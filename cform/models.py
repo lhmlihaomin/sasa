@@ -37,6 +37,25 @@ class CFormType(models.Model):
     def __str__(self):
         return self.name
 
+    @property
+    def cfield_order(self):
+        return self.field_order.replace(' ','').split(",")
+
+    @property
+    def cfield_dict(self):
+        r = {}
+        for cfield in self.fields.all():
+            r.update({cfield.name: cfield})
+        return r
+
+    @property
+    def ordered_fields(self):
+        r = []
+        d = self.cfield_dict
+        for field_name in self.cfield_order:
+            r.append(d.get(field_name))
+        return r
+
 
 class CForm(models.Model):
     name = models.CharField(max_length=100)
