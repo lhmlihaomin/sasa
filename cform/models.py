@@ -27,6 +27,14 @@ class CField(models.Model):
     def __str__(self):
         return self.name
 
+    @property
+    def choices(self):
+        if not self.field_type.startswith("select"):
+            raise(Exception("Field Type Error."))
+        
+        choices = map(lambda x: (x, x), self.options.split("|"))
+        return choices
+
 
 class CFormType(models.Model):
     name = models.CharField(max_length=100)
