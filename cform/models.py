@@ -44,7 +44,7 @@ class CFormType(models.Model):
 
     @property
     def cfield_order(self):
-        return self.field_order.replace(' ','').split(",")
+        return map(unicode.strip, self.field_order.split(", "))
 
     @property
     def cfield_dict(self):
@@ -69,7 +69,6 @@ class CForm(models.Model):
     def __str__(self):
         return self.name
     
-
 
 class CFormFieldValue(models.Model):
     form = models.ForeignKey(CForm, on_delete=models.CASCADE)
