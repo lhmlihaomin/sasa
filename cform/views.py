@@ -12,8 +12,15 @@ def index(request):
     cf.form_type = cft
 
     cform = CBaseForm()
-    for f in cf.form_type.ordered_fields:
-        cform.fields.update({f.name: cform.map_field(f)})
+    """for f in cf.form_type.ordered_fields:
+        cform.fields.update({f.name: cform.map_field(f)})"""
+    cform.set_fields(cf.form_type.ordered_fields)
 
-    return render(request, 'cform/index.html', {'form': cform})
+    data = {}
+    if request.method == 'POST':
+        cform.set_data(request.POST)
+        if cform.is_valid():
+            data = cform.cleaned_data
+
+    return render(request, 'cform/index.html', {'form': cform, 'data': repr(data)})
     

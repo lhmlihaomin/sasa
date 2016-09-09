@@ -29,9 +29,6 @@ class CField(models.Model):
 
     @property
     def choices(self):
-        if not self.field_type.startswith("select"):
-            raise(Exception("Field Type Error."))
-        
         choices = map(lambda x: (x, x), self.options.split("|"))
         return choices
 

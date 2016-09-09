@@ -23,10 +23,26 @@ class CBaseForm(forms.Form):
         elif cfield.field_type == "select_multiple":
             f = forms.MultipleChoiceField(required=cfield.required, choices=cfield.choices)
         elif cfield.field_type == "checkbox":
-            pass
+            f = forms.BooleanField(required=cfield.required)
         elif cfield.field_type == "radio":
-            pass
+            f = forms.ChoiceField(required=cfield.required, choices=cfield.choices, widget=forms.RadioSelect)
         else:
             # return a generic text input:
             f = forms.CharField()
         return f
+
+
+    def set_fields(self, ordered_fields):
+        for f in ordered_fields:
+            self.fields.update({f.name: self.map_field(f)})
+
+
+    def set_data(self, post_data):
+        # find each field and set its data:
+        for key in post_data:
+            print(key)
+            if self.fields.has_key(key):
+                self.data[key] = post_data[key]
+        
+        # don't forget to set this, or this form is never valid:
+        self.is_bound = True

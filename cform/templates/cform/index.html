@@ -13,10 +13,13 @@ form>table td, form>table th {
         </style>
     </head>
     <body>
-        <form method="POST">
+        <form method="POST">{% csrf_token %}
             <table>
                 {{ form.as_table }}
             </table>
+            <input type="submit" value="Submit" />
         </form>
+
+        <pre>{{ data }}</pre>
     </body>
 </html>
