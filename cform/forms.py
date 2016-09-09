@@ -21,7 +21,7 @@ class CBaseForm(forms.Form):
         elif cfield.field_type == "select":
             f = forms.ChoiceField(required=cfield.required, choices=cfield.choices)
         elif cfield.field_type == "select_multiple":
-            f = forms.ChoiceField(required=cfield.required, choices=cfield.choices)
+            f = forms.MultipleChoiceField(required=cfield.required, choices=cfield.choices)
         elif cfield.field_type == "checkbox":
             pass
         elif cfield.field_type == "radio":

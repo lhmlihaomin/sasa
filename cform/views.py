@@ -15,11 +15,5 @@ def index(request):
     for f in cf.form_type.ordered_fields:
         cform.fields.update({f.name: cform.map_field(f)})
 
-    r = ""
-    for f in cf.form_type.ordered_fields:
-        r += "%s(%s)<br/>\n"%(
-            f.name,
-            f.field_type,
-        )
-    return HttpResponse("<table>"+cform.as_table()+"</table>")
+    return render(request, 'cform/index.html', {'form': cform})
     
