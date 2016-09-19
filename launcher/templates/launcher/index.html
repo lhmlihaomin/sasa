@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+    <head>
+        <meta http-equiv="content-type" content="text/html; Charset=UTF-8" />
+        <link rel="stylesheet" type="text/css" href="{% static 'launcher/bootstrap.min.css' %}"/>
+        <link rel="stylesheet" type="text/css" href="{% static 'launcher/common.css' %}"/>
+        <link rel="stylesheet" type="text/css" href="{% static 'launcher/metisMenu.min.css' %}"/>
+        <link rel="stylesheet" type="text/css" href="{% static 'launcher/font-awesome.min.css' %}"/>
+        <link rel="stylesheet" type="text/css" href="{% static 'launcher/sb-admin-2.css' %}"/>
+    </head>
+    <body>
+        <div id="wrapper">
+
+            <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0px;">
+                <div class="navbar-default sidebar" role="navigation">
+                    <div class="sidebar-nav navbar-collapse">
+                        <ul class="nav" id="side-menu">
+                            <li class="sidebar-search">
+                                <div class="form-group">
+                                    <label>PROFILE</label>
+                                    <select class="form-control">
+                                        <option>global-alpha</option>
+                                        <option>global-beta</option>
+                                        <option>global-prd</option>
+                                        <option>cn-alpha</option>
+                                        <option>cn-beta</option>
+                                        <option>cn-prd</option>
+                                    </select>
+                                </div>
+                            </li>
+                            <li class="sidebar-search">
+                                <div class="form-group">
+                                    <label>REGION</label>
+                                    <select class="form-control">
+                                        <option>ap-southeast-1</option>
+                                        <option>eu-west-1</option>
+                                        <option>us-east-1</option>
+                                        <option>cn-north-1</option>
+                                    </select>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+
+            <div id="page-wrapper" style="min-height: 726px;">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h1 class="page-header">PRD DEPLOYMENT</h1>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-lg-5">
+                        <div class="panel panel-primary">
+                            <div class="panel-heading">MODULE LIST</div>
+                            <div class="panel-body">
+                                <div class="panel-group" id="module_accordion">
+                                    {% for module, items in modules.items %}
+                                    <!-- GROUP ITEM -->
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <h4 class="panel-title">
+                                                <a class="" href="#collapse_{{forloop.counter}}" 
+                                                data-parent="#module_accordion" 
+                                                data-toggle="collapse" 
+                                                aria-expanded="true">{{module}}</a>
+                                            </h4>
+                                        </div>
+                                        <div id="collapse_{{forloop.counter}}" class="panel-collapse collapse"
+                                             aria-expanded="true" style="">
+                                             <div class="panel-body">
+                                                 <table class="table table-hover">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>MODULE</th>
+                                                            <th>VERSION</th>
+                                                            <th>REGION</th>
+                                                            <th>AZ</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {% for item in items %}
+                                                        <tr>
+                                                            <td>{{item.0}}</td>
+                                                            <td>{{item.1}}</td>
+                                                            <td>{{item.2}}</td>
+                                                            <td>{{item.3}}</td>
+                                                        </tr>
+                                                        {% endfor %}
+                                                    </tbody>
+                                                </table>
+                                             </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+
+        </div>
+
+        <script src="{% static 'launcher/js/jquery-1.12.4.min.js' %}"></script>
+        <script src="{% static 'launcher/js/bootstrap.min.js' %}"></script>
+        <script src="{% static 'launcher/js/metisMenu.min.js' %}"></script>
+        <script src="{% static 'launcher/js/sb-admin-2.js' %}"></script>
+
+    </body>
+</html>
