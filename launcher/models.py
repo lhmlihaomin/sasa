@@ -5,6 +5,7 @@ from django.db import models
 # Create your models here.
 class Profile(models.Model):
     name = models.CharField(max_length=100)
+    account_id = models.CharField(max_length=200)
 
     def __str__(self):
         return self.name
@@ -25,6 +26,11 @@ class AWSResource(models.Model):
     resource_id = models.CharField(max_length=500)
     resource_type = models.CharField(max_length=100)
     arn = models.CharField(max_length=500, default=None, blank=True)
+    parent = models.ForeignKey('self', 
+                                  on_delete=models.CASCADE,
+                                  default=None, 
+                                  null=True,
+                                  blank=True)
 
     def __str__(self):
         return "['%s', '%s']"%(self.name, self.resource_id)
