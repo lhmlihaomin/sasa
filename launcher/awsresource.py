@@ -24,7 +24,7 @@ class AWSResourceHandler(object):
             self.images.append([image.name, image.id, "image", None])
         return self.images
 
-    def update_keypairs(self):
+    def update_key_pairs(self):
         self.key_pairs = []
         res = self.session.resource("ec2")
         for key_pair in res.key_pairs.all():
@@ -88,12 +88,23 @@ class AWSResourceHandler(object):
             ])
         return self.server_certificates
 
+    def update_all(self):
+        self.update_images()
+        self.update_key_pairs()
+        self.update_instance_profiles()
+        self.update_vpcs()
+        self.update_subnets()
+        self.update_security_groups()
+        self.update_server_certificates()
+
 
 def main():
 
     import json
     def pprint(obj):
+        print("^^^^^^^^^^")
         print(json.dumps(obj, indent=2))
+        print("$$$$$$$$$$")
 
     account_id = "681545073814"
     boto3_session = boto3.Session(profile_name="cn-alpha")
@@ -104,7 +115,15 @@ def main():
     #pprint(arh.update_vpcs())
     #pprint(arh.update_subnets())
     #pprint(arh.update_security_groups())
-    pprint(arh.update_server_certificates())
+    #pprint(arh.update_server_certificates())
+    arh.update_all()
+    pprint(arh.images)
+    pprint(arh.key_pairs)
+    pprint(arh.instance_profiles)
+    pprint(arh.vpcs)
+    pprint(arh.subnets)
+    pprint(arh.security_groups)
+    pprint(arh.server_certificates)
 
 if __name__ == "__main__":
     main()

@@ -3,11 +3,11 @@
 <html>
     <head>
         <meta http-equiv="content-type" content="text/html; Charset=UTF-8" />
-        <link rel="stylesheet" type="text/css" href="{% static 'launcher/bootstrap.min.css' %}"/>
-        <link rel="stylesheet" type="text/css" href="{% static 'launcher/common.css' %}"/>
-        <link rel="stylesheet" type="text/css" href="{% static 'launcher/metisMenu.min.css' %}"/>
-        <link rel="stylesheet" type="text/css" href="{% static 'launcher/font-awesome.min.css' %}"/>
-        <link rel="stylesheet" type="text/css" href="{% static 'launcher/sb-admin-2.css' %}"/>
+        <link rel="stylesheet" type="text/css" href="{% static 'launcher/css/bootstrap.min.css' %}"/>
+        <link rel="stylesheet" type="text/css" href="{% static 'launcher/css/common.css' %}"/>
+        <link rel="stylesheet" type="text/css" href="{% static 'launcher/css/metisMenu.min.css' %}"/>
+        <link rel="stylesheet" type="text/css" href="{% static 'launcher/css/font-awesome.min.css' %}"/>
+        <link rel="stylesheet" type="text/css" href="{% static 'launcher/css/sb-admin-2.css' %}"/>
     </head>
     <body>
         <div id="wrapper">
@@ -17,28 +17,36 @@
                     <div class="sidebar-nav navbar-collapse">
                         <ul class="nav" id="side-menu">
                             <li class="sidebar-search">
-                                <div class="form-group">
+                                <div class="input-group">
                                     <label>PROFILE</label>
-                                    <select class="form-control">
-                                        <option>global-alpha</option>
-                                        <option>global-beta</option>
-                                        <option>global-prd</option>
-                                        <option>cn-alpha</option>
-                                        <option>cn-beta</option>
-                                        <option>cn-prd</option>
+                                    <select id="selProfile" class="form-control" onchange="getRegionsForProfile()" autocomplete="off">
+                                        <option value="0" selected> --- </option>
+                                        {% for profile in profiles %}
+                                        <option value="{{profile.id}}">{{profile.name}}</option>
+                                        {% endfor %}
                                     </select>
                                 </div>
                             </li>
                             <li class="sidebar-search">
-                                <div class="form-group">
+                                <div class="input-group">
                                     <label>REGION</label>
-                                    <select class="form-control">
-                                        <option>ap-southeast-1</option>
-                                        <option>eu-west-1</option>
-                                        <option>us-east-1</option>
-                                        <option>cn-north-1</option>
+                                    <select id="selRegions" class="form-control">
+                                        <option value="0"> --- </option>
                                     </select>
                                 </div>
+                            </li>
+                            <li>
+                                <a href="#">
+                                    <i class="fa fa-wrench fa-fw"> </i>AWS RESOURCES<span class="fa arrow"> </span>
+                                </a>
+                                <ul class="nav nav-second-level collapse in" aria-expanded="true">
+                                    <li>
+                                        <a href="#">BROWSE</a>
+                                    </li>
+                                    <li>
+                                        <a href="#">UPDATE</a>
+                                    </li>
+                                </ul>
                             </li>
                         </ul>
                     </div>
@@ -110,6 +118,57 @@
         <script src="{% static 'launcher/js/bootstrap.min.js' %}"></script>
         <script src="{% static 'launcher/js/metisMenu.min.js' %}"></script>
         <script src="{% static 'launcher/js/sb-admin-2.js' %}"></script>
+        <script>
+// using jQuery
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+function csrfSafeMethod(method) {
+    // these HTTP methods do not require CSRF protection
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+}
 
+var csrftoken = getCookie('csrftoken');
+$.ajaxSetup({
+    beforeSend: function(xhr, settings) {
+        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+        }
+    }
+});
+
+function getRegionsForProfile() {
+    var profileId = $("#selProfile").val();
+    if (profileId == 0) {
+        return false;
+    }
+    $.ajax({
+        url: "get_regions_for_profile/"+profileId+"/",
+        dataType: "json",
+        success: listRegions
+    })
+}
+function listRegions(regions) {
+    var selRegions = $('#selRegions');
+    selRegions.empty();
+    for (var i=0; i<regions.length; i++) {
+        var option = $('<option></option>').html(regions[i].full_name)
+                                           .prop("value", regions[i].id);
+        selRegions.append(option);
+    }
+}
+</script>
     </body>
 </html>

@@ -20,8 +20,19 @@ class Region(models.Model):
     def __str__(self):
         return self.name
 
+    @staticmethod
+    def to_dict(obj):
+        return {
+            'id': obj.id,
+            'name': obj.name,
+            'full_name': obj.full_name,
+            'code': obj.code
+        }
+
 
 class AWSResource(models.Model):
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE, default=None, null=True)
+    region = models.ForeignKey(Region, on_delete=models.CASCADE, default=None, null=True)
     name = models.CharField(max_length=500)
     resource_id = models.CharField(max_length=500)
     resource_type = models.CharField(max_length=100)
