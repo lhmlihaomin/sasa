@@ -31,7 +31,6 @@ def index(request):
             ["appservice_pushservice", "1.0.0_1.0.0", "aps1", "a"],
             ["appservice_pushservice", "1.0.1_1.0.1", "aps1", "a"],
         ]
-
     }
     ctx = {
         'profiles': profiles,

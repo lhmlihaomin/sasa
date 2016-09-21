@@ -56,18 +56,18 @@
             <div id="page-wrapper" style="min-height: 726px;">
                 <div class="row">
                     <div class="col-lg-12">
-                        <h1 class="page-header">PRD DEPLOYMENT</h1>
+                        <h1 class="page-header">EC2 CONFIG FILES</h1>
                     </div>
                 </div>
                 
                 <div class="row">
-                    <div class="col-lg-5">
+                    <div class="col-lg-6">
+                        <!--
                         <div class="panel panel-primary">
                             <div class="panel-heading">MODULE LIST</div>
                             <div class="panel-body">
                                 <div class="panel-group" id="module_accordion">
                                     {% for module, items in modules.items %}
-                                    <!-- GROUP ITEM -->
                                     <div class="panel panel-default">
                                         <div class="panel-heading">
                                             <h4 class="panel-title">
@@ -107,8 +107,47 @@
                                 </div>
                             </div>
                         </div>
+                        -->
+
+                        <!-- MODULES -->
+                        {% for module, items in modules.items %}
+                        <div class="panel panel-primary" style="">
+                            <div class="panel-heading">{{module}}</div>
+                            <div class="panel-body">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>MODULE</th>
+                                            <th>VERSION</th>
+                                            <th>REGION</th>
+                                            <th>AZ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in items %}
+                                        <tr>
+                                            <td>{{item.0}}</td>
+                                            <td>{{item.1}}</td>
+                                            <td>{{item.2}}</td>
+                                            <td>{{item.3}}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        <!-- /MODULES -->
+
                     </div>
-                    
+
+                    <div class="col-lg-6">
+                        <div class="panel panel-green">
+                            <div class="panel-heading">CONFIG DETAIL</div>
+                            <div class="panel-body"></div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
