@@ -3,6 +3,7 @@
 <html>
     <head>
         <meta http-equiv="content-type" content="text/html; Charset=UTF-8" />
+        <title>EC2 DEPLOYMENT</title>
         <link rel="stylesheet" type="text/css" href="{% static 'launcher/css/bootstrap.min.css' %}"/>
         <link rel="stylesheet" type="text/css" href="{% static 'launcher/css/common.css' %}"/>
         <link rel="stylesheet" type="text/css" href="{% static 'launcher/css/metisMenu.min.css' %}"/>
@@ -41,10 +42,10 @@
                                 </a>
                                 <ul class="nav nav-second-level collapse in" aria-expanded="true">
                                     <li>
-                                        <a href="#">BROWSE</a>
+                                        <a href="#" data-target="#modalResources" data-toggle="modal" onclick="listResources()">BROWSE</a>
                                     </li>
                                     <li>
-                                        <a href="#">UPDATE</a>
+                                        <a href="#" onclick="beginUpdateResources()">UPDATE</a>
                                     </li>
                                 </ul>
                             </li>
@@ -56,7 +57,12 @@
             <div id="page-wrapper" style="min-height: 726px;">
                 <div class="row">
                     <div class="col-lg-12">
-                        <h1 class="page-header">EC2 CONFIG FILES</h1>
+                        <div id="divMsg" class="alert alert-warning">Please select a profile.</div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h1 class="page-header">EC2 LAUNCH OPTION SETS</h1>
                     </div>
                 </div>
                 
@@ -144,13 +150,97 @@
                     <div class="col-lg-6">
                         <div class="panel panel-green">
                             <div class="panel-heading">CONFIG DETAIL</div>
-                            <div class="panel-body"></div>
+                            <div class="panel-body">
+                                <form method="POST" action="#">
+                                    <div class="form-group">
+                                        <label>image</label>
+                                        <input class="form-control"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>key_pair</label>
+                                        <input class="form-control"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>instance_type</label>
+                                        <input class="form-control"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>vpc</label>
+                                        <input class="form-control"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>subnets</label>
+                                        <input class="form-control"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>security_group</label>
+                                        <input class="form-control"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>alloc_public_ip</label>
+                                        <input class="form-control"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>instance_profile</label>
+                                        <input class="form-control"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>use_default_ebs_settings</label>
+                                        <input class="form-control"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>volume_type</label>
+                                        <input class="form-control"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>volume_size</label>
+                                        <input class="form-control"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>volume_iops</label>
+                                        <input class="form-control"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>sourceDestCheck</label>
+                                        <input class="form-control"/>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                     </div>
 
                 </div>
             </div>
 
+        </div>
+
+        <div id="modalResources" class="modal fade" aria-hidden="true" alia-labelledby="modalLabelResources" role="dialog" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content" style="width: auto;">
+                    <div class="modal-header">
+                        <button class="close" aria-hidden="true" data-dismiss="modal" type="button">x</button>
+                        <h4 id="modalLabelResources" class="modal-title">AWS RESOURCES</h4>
+                    </div>
+                    <div id="divAWSResources" class="modal-body">
+                        <table class="table table-striped table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>NAME</th>
+                                    <th>ID</th>
+                                    <th>TYPE</th>
+                                    <th>ARN</th>
+                                    <th>PARENT</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyAWSResources">
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="modal-footer">
+                        <button data-dismiss="modal" class="btn btn-default" type="button">Close</button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <script src="{% static 'launcher/js/jquery-1.12.4.min.js' %}"></script>
@@ -187,12 +277,36 @@ $.ajaxSetup({
         }
     }
 });
+function showStartMessage(msg) {
+    $('#divMsg').removeClass("alert-success")
+                .removeClass("alert-danger")
+                .addClass("alert-warning")
+                .html(msg);
+}
+function showResultMessage(msg) {
+    $('#divMsg').removeClass("alert-warning")
+                .removeClass("alert-danger")
+                .addClass("alert-success")
+                .html(msg);
+}
+function showErrorMessage(msg) {
+    $('#divMsg').removeClass("alert-warning")
+                .removeClass("alert-success")
+                .addClass("alert-danger")
+                .html(msg);
+}
 
 function getRegionsForProfile() {
     var profileId = $("#selProfile").val();
+    var selRegions = $('#selRegions');
     if (profileId == 0) {
+        selRegions.empty();
+        var option = $('<option></option>').html("---")
+                                           .prop("value", 0);
+        selRegions.append(option);
         return false;
     }
+    showStartMessage("Loading Regions...");
     $.ajax({
         url: "get_regions_for_profile/"+profileId+"/",
         dataType: "json",
@@ -207,6 +321,88 @@ function listRegions(regions) {
                                            .prop("value", regions[i].id);
         selRegions.append(option);
     }
+    showResultMessage("Regions loaded.")
+}
+var resourceTypes = [
+    "images",
+    "key_pairs",
+    "instance_profiles",
+    "vpcs",
+    "subnets",
+    "security_groups",
+    "server_certificates"
+];
+var updateResourceIndex = 0;
+function updateNextResources() {
+    updateResourceIndex++;
+    if (updateResourceIndex >= resourceTypes.length) {
+        showResultMessage("Rsc updated.");
+        return;
+    }
+    
+    showStartMessage("updating "+resourceTypes[updateResourceIndex]+"...");
+    var profileId = $('#selProfile').val();
+    var regionId = $('#selRegions').val();
+    $.ajax({
+        method: "post",
+        url: "./update_resource/",
+        data: {
+            profile_id: profileId,
+            region_id: regionId,
+            resource_type: resourceTypes[updateResourceIndex]
+        },
+        success: updateNextResources
+    })
+}
+function beginUpdateResources() {
+    var profileId = $('#selProfile').val();
+    var regionId = $('#selRegions').val();
+    if (profileId == 0 || regionId == 0) {
+        showErrorMessage("You need to select a profile/region first.");
+        return;
+    }
+    updateResourceIndex = 0;
+    showStartMessage("Clearing resources...");
+    
+    $.ajax({
+        method: "post",
+        url: "./clear_resources/",
+        data: {
+            profile_id: profileId,
+            region_id: regionId,
+        },
+        dataType: "json",
+        success: updateNextResources
+    })
+}
+function listResources() {
+    function showListResources(data) {
+        var tbody = $('#tbodyAWSResources');
+        tbody.empty()
+        for (var i=0; i<data.length; i++) {
+            var item = data[i];
+            var tr = $('<tr></tr>')
+                .append($('<td></td>').html(item.name))
+                .append($('<td></td>').html(item.resource_id))
+                .append($('<td></td>').html(item.resource_type))
+                .append($('<td></td>').html(item.arn))
+                .append($('<td></td>').html(item.parent));
+            tr.appendTo(tbody);
+        }
+    }
+
+    var profileId = $('#selProfile').val();
+    var regionId = $('#selRegions').val();
+    $.ajax({
+        url: "./list_resources/",
+        method: "post",
+        data: {
+            profile_id: profileId,
+            region_id: regionId
+        },
+        dataType: "json",
+        success: showListResources
+    });
 }
 </script>
     </body>

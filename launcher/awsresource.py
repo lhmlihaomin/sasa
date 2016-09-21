@@ -19,16 +19,16 @@ class AWSResourceHandler(object):
         self.images = []
         res = self.session.resource("ec2")
         for image in res.images.filter(Owners=[self.account_id]):
-            self.images.append([image.name, image.id, "image"])
+            self.images.append([image.name, image.id, "image", None, None])
         for image in res.images.filter(ExecutableUsers=[self.account_id]):
-            self.images.append([image.name, image.id, "image", None])
+            self.images.append([image.name, image.id, "image", None, None])
         return self.images
 
     def update_key_pairs(self):
         self.key_pairs = []
         res = self.session.resource("ec2")
         for key_pair in res.key_pairs.all():
-            self.key_pairs.append([key_pair.name, key_pair.name, "key_pair", None])
+            self.key_pairs.append([key_pair.name, key_pair.name, "key_pair", None, None])
         return self.key_pairs
 
     def update_instance_profiles(self):
@@ -39,7 +39,8 @@ class AWSResourceHandler(object):
                 instance_profile.name,
                 instance_profile.name,
                 "instance_profile",
-                instance_profile.arn
+                instance_profile.arn,
+                None
             ])
         return self.instance_profiles
 
@@ -47,7 +48,7 @@ class AWSResourceHandler(object):
         self.vpcs = []
         res = self.session.resource("ec2")
         for vpc in res.vpcs.all():
-            self.vpcs.append([self._name_tag(vpc), vpc.id, "vpc", None])
+            self.vpcs.append([self._name_tag(vpc), vpc.id, "vpc", None, None])
         return self.vpcs
 
     def update_subnets(self):
@@ -84,7 +85,8 @@ class AWSResourceHandler(object):
                 cert.name,
                 cert.name,
                 'server_certificate',
-                cert.server_certificate_metadata['Arn']
+                cert.server_certificate_metadata['Arn'],
+                None
             ])
         return self.server_certificates
 
