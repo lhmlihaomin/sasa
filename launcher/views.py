@@ -90,3 +90,7 @@ def ajax_listEC2LaunchOptionSets(request):
     optionsets = EC2LaunchOptionSet.objects.filter(profile=profile, region=region).order_by('module', 'version')
     seq = map(EC2LaunchOptionSet.to_dict, optionsets)
     return HttpResponse(json.dumps(seq), content_type="application/json")
+
+def ajax_viewEC2LaunchOptionSets(request):
+    optionset = get_object_or_404(EC2LaunchOptionSet, pk=request.POST.get("id"))
+    return HttpResponse(json.dumps(EC2LaunchOptionSet.to_dict(optionset), indent=2))

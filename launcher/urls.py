@@ -9,4 +9,5 @@ urlpatterns = [
     url("^list_resources/", views.ajax_listResources, name="ajax_listResources"),
     url("^clear_resources/", views.ajax_clearResources, name="ajax_clearResources"),
     url("^list_ec2launchoptionsets/", views.ajax_listEC2LaunchOptionSets, name="ajax_listEC2LaunchOptionSets"),
+    url("^view_ec2launchoptionsets/", views.ajax_viewEC2LaunchOptionSets, name="ajax_viewEC2LaunchOptionSets"),
 ]

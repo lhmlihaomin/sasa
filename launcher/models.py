@@ -113,5 +113,6 @@ class EC2LaunchOptionSet(models.Model):
             'version': obj.version,
             'region': obj.region.name,
             'az': obj.az,
-            'ami_version_match': obj.ami_version_match()
+            'ami_version_match': obj.ami_version_match(),
+            'content': obj.content
         }
