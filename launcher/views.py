@@ -6,7 +6,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 import boto3
 
-from .models import Profile, Region, AWSResource
+from .models import Profile, Region, AWSResource, EC2LaunchOptionSet
 from .awsresource import AWSResourceHandler
 
 
@@ -15,29 +15,11 @@ def index(request):
     profiles = Profile.objects.all()
     regions = Region.objects.all()
 
-    modules = {
-        "account": [
-            ["account", "1.1.1", "aps1", "a"],
-            ["account", "1.1.2", "aps1", "a"],
-        ],
-        "connector": [
-            ["connector", "2.0.8", "aps1", "a"],
-            ["connector", "2.0.9", "aps1", "a"],
-        ],
-        "device": [
-            ["device", "2.1.12", "aps1", "a"],
-            ["device", "2.1.13", "aps1", "a"],
-        ],
-        "appservice_pushservice": [
-            ["appservice_pushservice", "1.0.0_1.0.0", "aps1", "a"],
-            ["appservice_pushservice", "1.0.1_1.0.1", "aps1", "a"],
-        ]
-    }
     ctx = {
         'profiles': profiles,
         'regions': regions,
-        'modules': modules,
     }
+
     return render(request, "launcher/index.html", ctx)
 
 
@@ -60,7 +42,7 @@ def ajax_clearResources(request):
     awsresources = AWSResource.objects.filter(profile=profile, region=region).order_by("-resource_type")
     for awsresource in awsresources:
         awsresource.delete()
-    return HttpResponse("true")
+    return HttpResponse("true", content_type="application/json")
 
 def ajax_updateResource(request):
     profile = get_object_or_404(Profile, pk=request.POST.get('profile_id'))
@@ -89,7 +71,7 @@ def ajax_updateResource(request):
                 awsresource.save()
             else:
                 awsresource.save()
-        return HttpResponse("OK")
+        return HttpResponse("true", content_type="application/json")
     except AttributeError:
         return HttpResponse("No such resource type", status_code=400)
     
@@ -99,4 +81,12 @@ def ajax_listResources(request):
     region = get_object_or_404(Region, pk=request.POST.get('region_id'))
     awsresources = AWSResource.objects.filter(profile=profile, region=region).order_by("-resource_type")
     seq = map(AWSResource.to_dict, awsresources)
-    return HttpResponse(json.dumps(seq))
+    return HttpResponse(json.dumps(seq), content_type="application/json")
+
+
+def ajax_listEC2LaunchOptionSets(request):
+    profile = get_object_or_404(Profile, pk=request.POST.get('profile_id'))
+    region = get_object_or_404(Region, pk=request.POST.get('region_id'))
+    optionsets = EC2LaunchOptionSet.objects.filter(profile=profile, region=region).order_by('module', 'version')
+    seq = map(EC2LaunchOptionSet.to_dict, optionsets)
+    return HttpResponse(json.dumps(seq), content_type="application/json")

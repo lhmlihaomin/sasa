@@ -7,10 +7,12 @@ class AWSResourceHandler(object):
         self.session = boto3_session
 
     def _tag_value(self, obj, key):
+        if obj.tags is None:
+            return ""
         for tag in obj.tags:
             if tag['Key'].lower() == key.lower():
                 return tag['Value']
-        return None
+        return ""
 
     def _name_tag(self, obj):
         return self._tag_value(obj, 'name')

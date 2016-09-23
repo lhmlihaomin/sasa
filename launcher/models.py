@@ -104,3 +104,14 @@ class EC2LaunchOptionSet(models.Model):
         except:
             return False
         return False
+
+    @staticmethod
+    def to_dict(obj):
+        return {
+            'id': obj.id,
+            'module': obj.module,
+            'version': obj.version,
+            'region': obj.region.name,
+            'az': obj.az,
+            'ami_version_match': obj.ami_version_match()
+        }

@@ -9,6 +9,8 @@
         <link rel="stylesheet" type="text/css" href="{% static 'launcher/css/metisMenu.min.css' %}"/>
         <link rel="stylesheet" type="text/css" href="{% static 'launcher/css/font-awesome.min.css' %}"/>
         <link rel="stylesheet" type="text/css" href="{% static 'launcher/css/sb-admin-2.css' %}"/>
+        <link rel="stylesheet" type="text/css" href="{% static 'launcher/css/messenger.css' %}"/>
+        <link rel="stylesheet" type="text/css" href="{% static 'launcher/css/messenger-theme-flat.css' %}"/>
     </head>
     <body>
         <div id="wrapper">
@@ -36,16 +38,20 @@
                                     </select>
                                 </div>
                             </li>
+                            <li class="sidebar-search">
+                                <div class="input-groupo">
+                                    <button class="btn btn-primary" type="button" onclick="listEC2LaunchOptionSets()">LOAD</button>
+                                </div>
                             <li>
                                 <a href="#">
                                     <i class="fa fa-wrench fa-fw"> </i>AWS RESOURCES<span class="fa arrow"> </span>
                                 </a>
                                 <ul class="nav nav-second-level collapse in" aria-expanded="true">
                                     <li>
-                                        <a href="#" data-target="#modalResources" data-toggle="modal" onclick="listResources()">BROWSE</a>
+                                        <button class="btn btn-primary" type="button" onclick="listResources()" style="margin: 0.2em 2em;">BROWSE</button>
                                     </li>
                                     <li>
-                                        <a href="#" onclick="beginUpdateResources()">UPDATE</a>
+                                        <button class="btn btn-primary" type="button" onclick="beginUpdateResources()" style="margin: 0.2em 2em;">UPDATE</button>
                                     </li>
                                 </ul>
                             </li>
@@ -55,11 +61,13 @@
             </nav>
 
             <div id="page-wrapper" style="min-height: 726px;">
+                <!-- Message box. Now replaced by bootstrap messenger
                 <div class="row">
                     <div class="col-lg-12">
                         <div id="divMsg" class="alert alert-warning">Please select a profile.</div>
                     </div>
                 </div>
+                -->
                 <div class="row">
                     <div class="col-lg-12">
                         <h1 class="page-header">EC2 LAUNCH OPTION SETS</h1>
@@ -67,147 +75,11 @@
                 </div>
                 
                 <div class="row">
-                    <div class="col-lg-6">
-                        <!--
-                        <div class="panel panel-primary">
-                            <div class="panel-heading">MODULE LIST</div>
-                            <div class="panel-body">
-                                <div class="panel-group" id="module_accordion">
-                                    {% for module, items in modules.items %}
-                                    <div class="panel panel-default">
-                                        <div class="panel-heading">
-                                            <h4 class="panel-title">
-                                                <a class="" href="#collapse_{{forloop.counter}}" 
-                                                data-parent="#module_accordion" 
-                                                data-toggle="collapse" 
-                                                aria-expanded="true">{{module}}</a>
-                                            </h4>
-                                        </div>
-                                        <div id="collapse_{{forloop.counter}}" class="panel-collapse collapse"
-                                             aria-expanded="true" style="">
-                                             <div class="panel-body">
-                                                 <table class="table table-hover">
-                                                    <thead>
-                                                        <tr>
-                                                            <th>MODULE</th>
-                                                            <th>VERSION</th>
-                                                            <th>REGION</th>
-                                                            <th>AZ</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        {% for item in items %}
-                                                        <tr>
-                                                            <td>{{item.0}}</td>
-                                                            <td>{{item.1}}</td>
-                                                            <td>{{item.2}}</td>
-                                                            <td>{{item.3}}</td>
-                                                        </tr>
-                                                        {% endfor %}
-                                                    </tbody>
-                                                </table>
-                                             </div>
-                                        </div>
-                                    </div>
-                                    {% endfor %}
-                                </div>
-                            </div>
-                        </div>
-                        -->
-
-                        <!-- MODULES -->
-                        {% for module, items in modules.items %}
-                        <div class="panel panel-primary" style="">
-                            <div class="panel-heading">{{module}}</div>
-                            <div class="panel-body">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>MODULE</th>
-                                            <th>VERSION</th>
-                                            <th>REGION</th>
-                                            <th>AZ</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for item in items %}
-                                        <tr>
-                                            <td>{{item.0}}</td>
-                                            <td>{{item.1}}</td>
-                                            <td>{{item.2}}</td>
-                                            <td>{{item.3}}</td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        {% endfor %}
-                        <!-- /MODULES -->
+                    <div class="col-lg-10" id="divEC2LaunchOptionSetList">
 
                     </div>
 
-                    <div class="col-lg-6">
-                        <div class="panel panel-green">
-                            <div class="panel-heading">CONFIG DETAIL</div>
-                            <div class="panel-body">
-                                <form method="POST" action="#">
-                                    <div class="form-group">
-                                        <label>image</label>
-                                        <input class="form-control"/>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>key_pair</label>
-                                        <input class="form-control"/>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>instance_type</label>
-                                        <input class="form-control"/>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>vpc</label>
-                                        <input class="form-control"/>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>subnets</label>
-                                        <input class="form-control"/>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>security_group</label>
-                                        <input class="form-control"/>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>alloc_public_ip</label>
-                                        <input class="form-control"/>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>instance_profile</label>
-                                        <input class="form-control"/>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>use_default_ebs_settings</label>
-                                        <input class="form-control"/>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>volume_type</label>
-                                        <input class="form-control"/>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>volume_size</label>
-                                        <input class="form-control"/>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>volume_iops</label>
-                                        <input class="form-control"/>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>sourceDestCheck</label>
-                                        <input class="form-control"/>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
+                   
 
                 </div>
             </div>
@@ -247,6 +119,8 @@
         <script src="{% static 'launcher/js/bootstrap.min.js' %}"></script>
         <script src="{% static 'launcher/js/metisMenu.min.js' %}"></script>
         <script src="{% static 'launcher/js/sb-admin-2.js' %}"></script>
+        <script src="{% static 'launcher/js/messenger.min.js' %}"></script>
+        <script src="{% static 'launcher/js/messenger-theme-flat.js' %}"></script>
         <script>
 // using jQuery
 function getCookie(name) {
@@ -277,23 +151,39 @@ $.ajaxSetup({
         }
     }
 });
+
+var msg = null;
 function showStartMessage(msg) {
-    $('#divMsg').removeClass("alert-success")
+    /*$('#divMsg').removeClass("alert-success")
                 .removeClass("alert-danger")
                 .addClass("alert-warning")
-                .html(msg);
+                .html(msg);*/
+    window.msg = Messenger().post({
+        message: msg,
+        type: "info"
+    });
 }
 function showResultMessage(msg) {
-    $('#divMsg').removeClass("alert-warning")
+    /*$('#divMsg').removeClass("alert-warning")
                 .removeClass("alert-danger")
                 .addClass("alert-success")
-                .html(msg);
+                .html(msg);*/
+    window.msg.update({
+        message: msg,
+        hideAfter: 5,
+        type: 'success'
+    })
 }
 function showErrorMessage(msg) {
-    $('#divMsg').removeClass("alert-warning")
+    /*$('#divMsg').removeClass("alert-warning")
                 .removeClass("alert-success")
                 .addClass("alert-danger")
-                .html(msg);
+                .html(msg);*/
+    Messenger().post({
+        message: msg,
+        showCloseButton: true,
+        type: "error"
+    });
 }
 
 function getRegionsForProfile() {
@@ -378,7 +268,6 @@ function beginUpdateResources() {
 function listResources() {
     function showListResources(data) {
         var tbody = $('#tbodyAWSResources');
-        tbody.empty()
         for (var i=0; i<data.length; i++) {
             var item = data[i];
             var tr = $('<tr></tr>')
@@ -389,10 +278,18 @@ function listResources() {
                 .append($('<td></td>').html(item.parent));
             tr.appendTo(tbody);
         }
+        $('#modalResources').modal();
     }
+
+    var tbody = $('#tbodyAWSResources');
+    tbody.empty()
 
     var profileId = $('#selProfile').val();
     var regionId = $('#selRegions').val();
+    if (profileId == 0 || regionId == 0) {
+        showErrorMessage("You need to select a profile/region first.");
+        return false;
+    }
     $.ajax({
         url: "./list_resources/",
         method: "post",
@@ -404,6 +301,90 @@ function listResources() {
         success: showListResources
     });
 }
+
+function listEC2LaunchOptionSets() {
+    function makeModulePanel(module) {
+        if ($('#panelBody_'+module).length) {
+            return $('#panelBody_'+module);
+        } else {
+            var panelHeading = $('<div></div>').addClass("panel-heading").html(module);
+            var panelBody = $('<div></div>').addClass("panel-body").prop("id", "panelBody_"+module);
+            var moduleTable = $('<table></table>')
+                .addClass("table table-hover")
+                .append($('<thead><tr><th>MODULE</th><th>VERSION</th><th>REGION</th><th>AZ</th><th style="width:100px;"></th></tr></thead>'))
+                .append($('<tbody></tbody>').prop('id', 'tbody_'+module))
+                .appendTo(panelBody);
+            var panelModule = $('<div></div>')
+                .addClass("panel panel-primary")
+                .append(panelHeading)
+                .append(panelBody)
+                .appendTo($('#divEC2LaunchOptionSetList'));
+        }
+    }
+    function showListEC2LaunchOptionSets(data) {
+        for (var i=0;i<data.length;i++) {
+            var module = data[i].module;
+            var panelBody = makeModulePanel(module);
+            var tbody = $('#tbody_'+module);
+            var tdActions = $('<td></td>')
+                .append(
+                    $('<button></button>')
+                        .addClass('btn btn-primary')
+                        .css("margin-right", "2px")
+                        .append($('<i></i>').addClass('fa fa-list'))
+                        .prop("title", "Detail")
+                        .attr("onclick", "viewEC2LaunchOptionSet("+data[i].id+")")
+                )
+                .append(
+                    $('<button></button>')
+                        .addClass('btn btn-success')
+                        .append($('<i></i>').addClass('fa fa-play'))
+                        .prop("title", "Run")
+                        .attr("onclick", "runEC2LaunchOptionSet("+data[i].id+")")
+                )
+            var tr = $('<tr></tr>')
+                .append('<td>'+data[i].module+'</td>')
+                .append('<td>'+data[i].version+'</td>')
+                .append('<td>'+data[i].region+'</td>')
+                .append('<td>'+data[i].az+'</td>')
+                .append(tdActions)
+                .appendTo(tbody);
+                 
+        }
+    }
+
+    var profileId = $('#selProfile').val();
+    var regionId = $('#selRegions').val();
+    if (profileId == 0 || regionId == 0) {
+        showErrorMessage("You need to select a profile/region first.");
+        return false;
+    }
+    $('#divEC2LaunchOptionSetList').empty();
+    $.ajax({
+        url: "./list_ec2launchoptionsets/",
+        method: "post",
+        data: {
+            profile_id: profileId,
+            region_id: regionId
+        },
+        dataType: "json",
+        success: showListEC2LaunchOptionSets
+    });
+}
+function viewEC2LaunchOptionSet(setId) {
+    console.log(setId);
+}
+function runEC2LaunchOptionSet(setId) {
+    console.log(setId);
+}
+
+
+$(document).ready(function() {
+    Messenger.options = {
+        extraClasses: 'messenger-fixed messenger-on-top',
+        theme: 'flat'
+    }
+})
 </script>
     </body>
 </html>
