@@ -79,7 +79,7 @@ class EC2LaunchOptionSet(models.Model):
     def environ(self):
         if self.profile.name.lower().endswith("prd"):
             return "prd"
-        elif self.profile.name.lower.endswith("beta"):
+        elif self.profile.name.lower().endswith("beta"):
             return "preprd"
         else:
             return "dev"
@@ -108,6 +108,8 @@ class EC2LaunchOptionSet(models.Model):
     @staticmethod
     def to_dict(obj):
         return {
+            'environ': obj.environ,
+            'region': obj.region.name,
             'id': obj.id,
             'module': obj.module,
             'version': obj.version,

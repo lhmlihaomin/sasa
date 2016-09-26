@@ -15,6 +15,7 @@
     <body>
         <div id="wrapper">
 
+            <!-- NAVIGATION -->
             <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0px;">
                 <div class="navbar-default sidebar" role="navigation">
                     <div class="sidebar-nav navbar-collapse">
@@ -39,46 +40,36 @@
                                 </div>
                             </li>
                             <li class="sidebar-search">
-                                <div class="input-groupo">
+                                <div class="input-group">
+                                    <label style="display:block;">EC2 LAUNCH OPTION SETS</label>
+                                    <button class="btn btn-primary" type="button" onclick="showDialogEC2LaunchOptionSet()">NEW</button>
                                     <button class="btn btn-primary" type="button" onclick="listEC2LaunchOptionSets()">LOAD</button>
                                 </div>
-                            <li>
-                                <a href="#">
-                                    <i class="fa fa-wrench fa-fw"> </i>AWS RESOURCES<span class="fa arrow"> </span>
-                                </a>
-                                <ul class="nav nav-second-level collapse in" aria-expanded="true">
-                                    <li>
-                                        <button class="btn btn-primary" type="button" onclick="listResources()" style="margin: 0.2em 2em;">BROWSE</button>
-                                    </li>
-                                    <li>
-                                        <button class="btn btn-primary" type="button" onclick="beginUpdateResources()" style="margin: 0.2em 2em;">UPDATE</button>
-                                    </li>
-                                </ul>
+                            </li>
+                            <li class="sidebar-search">
+                                <div class="input-group">
+                                    <label style="display:block;">AWS RESOURCES</label>
+                                    <button class="btn btn-primary" type="button" onclick="listResources()">DISPLAY</button>
+                                    <button class="btn btn-primary" type="button" onclick="beginUpdateResources()">UPDATE</button>
+                                </div>
                             </li>
                         </ul>
                     </div>
                 </div>
             </nav>
+            <!-- /NAVIGATION -->
 
             <div id="page-wrapper" style="min-height: 726px;">
-                <!-- Message box. Now replaced by bootstrap messenger
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div id="divMsg" class="alert alert-warning">Please select a profile.</div>
-                    </div>
-                </div>
-                -->
-                <!--<div class="row">
-                    <div class="col-lg-12">
-                        <h1 class="page-header">EC2 LAUNCH OPTION SETS</h1>
-                    </div>
-                </div>-->
-                
                 <div class="row" style="padding-top:20px;">
+
+                    <!-- COL1: OPTION SET LIST -->
                     <div class="col-lg-6" id="divEC2LaunchOptionSetList"></div>
+                    <!-- /COL1 -->
+
+                    <!-- COL2: JSON EDITOR -->
                     <div class="col-lg-6">
                         <div class="panel panel-green">
-                            <div class="panel-heading">EC2 LAUNCH OPTION SET DETAIL</div>
+                            <div id="divEC2LaunchOptionSetTitle" class="panel-heading">EC2 LAUNCH OPTION SET DETAIL</div>
                             <div class="panel-body" style="height: 680px;">
                                 <div id="divAceEditorContainer">
                                     <div id="aceEditor" style="position:absolute; width:640px; height:640px; font-size:14px;">"Nothing loaded."</div>
@@ -86,15 +77,18 @@
                             </div>
                             <div class="panel-footer">
                                 <button type="button" class="btn btn-danger" onclick="editor.setValue('')">Clear</button>
+                                <button type="button" class="btn btn-primary" onclick="saveEC2LaunchOptionSet()">Save</button>
                             </div>
                         </div>
                     </div>
+                    <!-- /COL2 -->
 
                 </div>
             </div>
 
         </div>
 
+        <!-- RESOURCES LIST MODAL -->
         <div id="modalResources" class="modal fade" aria-hidden="true" aria-labelledby="modalLabelResources" role="dialog" tabindex="-1">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content" style="width: auto;">
@@ -103,7 +97,7 @@
                         <h4 id="modalLabelResources" class="modal-title">AWS RESOURCES</h4>
                     </div>
                     <div id="divAWSResources" class="modal-body">
-                        <table class="table table-striped table-bordered">
+                        <table class="table table-striped table-bordered" style="width:100%;font-size:0.9em;">
                             <thead>
                                 <tr>
                                     <th>NAME</th>
@@ -123,21 +117,52 @@
                 </div>
             </div>
         </div>
+        <!-- /RESOURCES LIST MODAL -->
 
-        <!-- ABANDONED: MODAL EDITOR
-            <div id="modalViewEC2LaunchOptionSet" class="modal fade" aria-hidden="true" aria-labelledby="modalLabelOptionSet" role="dialog" tabindex="-1">
+
+        <!-- CREATE NEW OPTION SET -->
+        <div id="modalNew" class="modal fade" aria-hidden="true" aria-labelledby="modalLabelNew" role="dialog" tabindex="-1">
             <div class="modal-dialog modal-lg">
-                <div class="modal-content" style="height: 500px;">
+                <div class="modal-content" style="width: auto;">
                     <div class="modal-header">
                         <button class="close" aria-hidden="true" data-dismiss="modal" type="button">x</button>
-                        <h4 id="modalLabelOptionSet" class="modal-title">EC2 LAUNCH OPTION SET DETAIL</h4>
+                        <h4 id="modalLabelNew" class="modal-title">New EC2 Launch Option Set</h4>
                     </div>
-                    <div id="divAceEditorContainer" class="modal-body">
-                        <div id="aceEditor" style="position:absolute; width:800px; height:400px; font-size:14px;">"Nothing loaded."</div>
+                    <div id="divNew" class="modal-body" style="height: 600px">
+                        <table class="table table-striped">
+                            <tbody>
+                                <tr>
+                                    <th style="width:76px;">MODULE</th>
+                                    <td><input id="iModule" name="module" type="text" class="form-control"/></td>
+                                </tr>
+                                <tr>
+                                    <th>VERSION</th>
+                                    <td><input id="iVersion" name="version" type="text" class="form-control"/></td>
+                                </tr>
+                                <tr>
+                                    <th>AZ</th>
+                                    <td><input id="iAZ" name="az" type="text" class="form-control"/></td>
+                                </tr>
+                                <tr>
+                                    <th>JSON</th>
+                                    <td>
+                                        <div id="divNewEditorContainer">
+                                            <div id="aceEditorNew" style="position:absolute; width:770px; height:400px; font-size:14px;"></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" type="button" onclick="newEC2LaunchOptionSet();">Save</button>
+                        <button data-dismiss="modal" class="btn btn-default" type="button">Close</button>
                     </div>
                 </div>
             </div>
-        </div>-->
+        </div>
+        <!-- /CREATE NEW OPTION SET --> 
 
         <script src="{% static 'launcher/js/jquery-1.12.4.min.js' %}"></script>
         <script src="{% static 'launcher/js/bootstrap.min.js' %}"></script>
@@ -146,7 +171,7 @@
         <script src="{% static 'launcher/js/messenger.min.js' %}"></script>
         <script src="{% static 'launcher/js/messenger-theme-flat.js' %}"></script>
         <script src="{% static 'launcher/js/ace.js' %}"></script>
-        <!--<script src="{% static 'launcher/js/mode-json.js' %}"></script>-->
+        <script src="{% static 'launcher/js/launcher.js' %}"></script>
         <script>
 // using jQuery
 function getCookie(name) {
@@ -178,68 +203,10 @@ $.ajaxSetup({
     }
 });
 
-var msg = null;
-function showStartMessage(msg) {
-    /*$('#divMsg').removeClass("alert-success")
-                .removeClass("alert-danger")
-                .addClass("alert-warning")
-                .html(msg);*/
-    window.msg = Messenger().post({
-        message: msg,
-        type: "info"
-    });
-}
-function showResultMessage(msg) {
-    /*$('#divMsg').removeClass("alert-warning")
-                .removeClass("alert-danger")
-                .addClass("alert-success")
-                .html(msg);*/
-    window.msg.update({
-        message: msg,
-        hideAfter: 5,
-        type: 'success'
-    })
-}
-function showErrorMessage(msg) {
-    /*$('#divMsg').removeClass("alert-warning")
-                .removeClass("alert-success")
-                .addClass("alert-danger")
-                .html(msg);*/
-    Messenger().post({
-        message: msg,
-        showCloseButton: true,
-        type: "error"
-    });
-}
 
-function getRegionsForProfile() {
-    var profileId = $("#selProfile").val();
-    var selRegions = $('#selRegions');
-    if (profileId == 0) {
-        selRegions.empty();
-        var option = $('<option></option>').html("---")
-                                           .prop("value", 0);
-        selRegions.append(option);
-        return false;
-    }
-    showStartMessage("Loading Regions...");
-    $.ajax({
-        url: "get_regions_for_profile/"+profileId+"/",
-        dataType: "json",
-        success: listRegions
-    })
-}
-function listRegions(regions) {
-    var selRegions = $('#selRegions');
-    selRegions.empty();
-    for (var i=0; i<regions.length; i++) {
-        var option = $('<option></option>').html(regions[i].full_name)
-                                           .prop("value", regions[i].id);
-        selRegions.append(option);
-    }
-    showResultMessage("Regions loaded.")
-}
-var resourceTypes = [
+/* global variables */
+var msg = null;                     // the pop-up Messenger object;
+var resourceTypes = [               // list of AWS resource types;
     "images",
     "key_pairs",
     "instance_profiles",
@@ -248,177 +215,10 @@ var resourceTypes = [
     "security_groups",
     "server_certificates"
 ];
-var updateResourceIndex = -1;
-function updateNextResources() {
-    updateResourceIndex++;
-    if (updateResourceIndex >= resourceTypes.length) {
-        showResultMessage("Resources have been updated.");
-        return;
-    }
-    
-    showStartMessage("updating "+resourceTypes[updateResourceIndex]+"...");
-    var profileId = $('#selProfile').val();
-    var regionId = $('#selRegions').val();
-    $.ajax({
-        method: "post",
-        url: "./update_resource/",
-        data: {
-            profile_id: profileId,
-            region_id: regionId,
-            resource_type: resourceTypes[updateResourceIndex]
-        },
-        success: updateNextResources
-    })
-}
-function beginUpdateResources() {
-    var profileId = $('#selProfile').val();
-    var regionId = $('#selRegions').val();
-    if (profileId == 0 || regionId == 0) {
-        showErrorMessage("You need to select a profile/region first.");
-        return;
-    }
-    updateResourceIndex = -1;
-    showStartMessage("Clearing resources...");
-    
-    $.ajax({
-        method: "post",
-        url: "./clear_resources/",
-        data: {
-            profile_id: profileId,
-            region_id: regionId,
-        },
-        dataType: "json",
-        success: updateNextResources
-    })
-}
-function listResources() {
-    function showListResources(data) {
-        var tbody = $('#tbodyAWSResources');
-        for (var i=0; i<data.length; i++) {
-            var item = data[i];
-            var tr = $('<tr></tr>')
-                .append($('<td></td>').html(item.name))
-                .append($('<td></td>').html(item.resource_id))
-                .append($('<td></td>').html(item.resource_type))
-                .append($('<td></td>').html(item.arn))
-                .append($('<td></td>').html(item.parent));
-            tr.appendTo(tbody);
-        }
-        $('#modalResources').modal();
-    }
-
-    var tbody = $('#tbodyAWSResources');
-    tbody.empty()
-
-    var profileId = $('#selProfile').val();
-    var regionId = $('#selRegions').val();
-    if (profileId == 0 || regionId == 0) {
-        showErrorMessage("You need to select a profile/region first.");
-        return false;
-    }
-    $.ajax({
-        url: "./list_resources/",
-        method: "post",
-        data: {
-            profile_id: profileId,
-            region_id: regionId
-        },
-        dataType: "json",
-        success: showListResources
-    });
-}
-
-function listEC2LaunchOptionSets() {
-    function makeModulePanel(module) {
-        if ($('#panelBody_'+module).length) {
-            return $('#panelBody_'+module);
-        } else {
-            var panelHeading = $('<div></div>').addClass("panel-heading").html(module);
-            var panelBody = $('<div></div>').addClass("panel-body").prop("id", "panelBody_"+module);
-            var moduleTable = $('<table></table>')
-                .addClass("table table-hover")
-                .append($('<thead><tr><th>MODULE</th><th>VERSION</th><th>REGION</th><th>AZ</th><th style="width:100px;"></th></tr></thead>'))
-                .append($('<tbody></tbody>').prop('id', 'tbody_'+module))
-                .appendTo(panelBody);
-            var panelModule = $('<div></div>')
-                .addClass("panel panel-primary")
-                .append(panelHeading)
-                .append(panelBody)
-                .appendTo($('#divEC2LaunchOptionSetList'));
-        }
-    }
-    function showListEC2LaunchOptionSets(data) {
-        for (var i=0;i<data.length;i++) {
-            var module = data[i].module;
-            var panelBody = makeModulePanel(module);
-            var tbody = $('#tbody_'+module);
-            var tdActions = $('<td></td>')
-                .append(
-                    $('<button></button>')
-                        .addClass('btn btn-primary')
-                        .css("margin-right", "2px")
-                        .append($('<i></i>').addClass('fa fa-list'))
-                        .prop("title", "Detail")
-                        .attr("onclick", "viewEC2LaunchOptionSet("+data[i].id+")")
-                )
-                .append(
-                    $('<button></button>')
-                        .addClass('btn btn-success')
-                        .append($('<i></i>').addClass('fa fa-play'))
-                        .prop("title", "Run")
-                        .attr("onclick", "runEC2LaunchOptionSet("+data[i].id+")")
-                )
-            var tr = $('<tr></tr>')
-                .append('<td>'+data[i].module+'</td>')
-                .append('<td>'+data[i].version+'</td>')
-                .append('<td>'+data[i].region+'</td>')
-                .append('<td>'+data[i].az+'</td>')
-                .append(tdActions)
-                .appendTo(tbody);
-                 
-        }
-    }
-
-    var profileId = $('#selProfile').val();
-    var regionId = $('#selRegions').val();
-    if (profileId == 0 || regionId == 0) {
-        showErrorMessage("You need to select a profile/region first.");
-        return false;
-    }
-    $('#divEC2LaunchOptionSetList').empty();
-    $.ajax({
-        url: "./list_ec2launchoptionsets/",
-        method: "post",
-        data: {
-            profile_id: profileId,
-            region_id: regionId
-        },
-        dataType: "json",
-        success: showListEC2LaunchOptionSets
-    });
-}
-function viewEC2LaunchOptionSet(setId) {
-    function showEC2LaunchOptionSet(data) {
-        editor.setValue("");
-        editor.setValue(data.content);
-        //$("#modalViewEC2LaunchOptionSet").modal();
-    }
-    $.ajax({
-        url: "./view_ec2launchoptionsets/",
-        method: "post",
-        data: {
-            id: setId
-        },
-        dataType: "json",
-        success: showEC2LaunchOptionSet
-    })
-    console.log(setId);
-}
-function runEC2LaunchOptionSet(setId) {
-    console.log(setId);
-}
-
-var editor;
+var updateResourceIndex = -1;       // index of which resource type is being updated;
+var editor;                         // JSON editor (ace) object;
+var editorNew;                      // JSON editor for creating new optionset;
+var EC2LaunchOptionSetId = 0;       // Id of 
 $(document).ready(function() {
     Messenger.options = {
         extraClasses: 'messenger-fixed messenger-on-top',
@@ -427,9 +227,15 @@ $(document).ready(function() {
 
     editor = ace.edit("aceEditor");
     editor.setTheme("ace/theme/eclipse");
-    editor.setReadOnly(true);
+    // editor.setReadOnly(true);
     editor.getSession().setMode("ace/mode/json");
     editor.$blockScrolling = Infinity;
+
+    editorNew = ace.edit("aceEditorNew");
+    editorNew.setTheme("ace/theme/eclipse");
+    // editor.setReadOnly(true);
+    editorNew.getSession().setMode("ace/mode/json");
+    editorNew.$blockScrolling = Infinity;
 })
 </script>
     </body>
