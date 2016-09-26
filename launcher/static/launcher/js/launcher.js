@@ -160,7 +160,7 @@ function listEC2LaunchOptionSets() {
             var panelBody = $('<div></div>').addClass("panel-body").prop("id", "panelBody_"+module);
             var moduleTable = $('<table></table>')
                 .addClass("table table-hover")
-                .append($('<thead><tr><th>MODULE</th><th>VERSION</th><th>REGION</th><th>AZ</th><th style="width:100px;"></th></tr></thead>'))
+                .append($('<thead><tr><th>MODULE</th><th>VERSION</th><th>REGION</th><th>AZ</th><th style="width:150px;"></th></tr></thead>'))
                 .append($('<tbody></tbody>').prop('id', 'tbody_'+module))
                 .appendTo(panelBody);
             var panelModule = $('<div></div>')
@@ -183,6 +183,14 @@ function listEC2LaunchOptionSets() {
                         .append($('<i></i>').addClass('fa fa-list'))
                         .prop("title", "Detail")
                         .attr("onclick", "viewEC2LaunchOptionSet("+data[i].id+")")
+                )
+                .append(
+                    $('<button></button>')
+                        .addClass('btn btn-primary')
+                        .css("margin-right", "2px")
+                        .append($('<i></i>').addClass('fa fa-arrow-up'))
+                        .prop("title", "Update to new version")
+                        .attr("onclick", "listImagesForModule("+data[i].id+")")
                 )
                 .append(
                     $('<button></button>')
@@ -321,5 +329,39 @@ function newEC2LaunchOptionSet() {
                 showErrorMessage("Failed to create EC2LaunchOptionSet. Please check your input.");
             }
         }
+    })
+}
+
+
+function listImagesForModule(setId) {
+    function showUpdateVersion(data) {
+        var sel = $('#selListImagesForModule');
+        sel.empty();
+        for (var i=0;i<data.length;i++) {
+            $('<option></option>')
+                .html(data[i].name+" ("+data[i].resource_id+")")
+                .attr('value', data[i].id)
+                .appendTo(sel);
+        }
+        $('#modalUpdateVersion').modal();
+    }
+
+
+    var profileId = $('#selProfile').val();
+    var regionId = $('#selRegions').val();
+    if (profileId == 0 || regionId == 0) {
+        showErrorMessage("You need to select a profile/region first.");
+        return false;
+    }
+    $.ajax({
+        url:"list_all_images_for_module/",
+        method: "post",
+        data:{
+            profile_id: profileId,
+            region_id: regionId,
+            id:setId
+        },
+        dataType:"json",
+        success: showUpdateVersion
     })
 }

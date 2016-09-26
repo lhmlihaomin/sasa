@@ -154,3 +154,15 @@ def ajax_newEC2LaunchOptionSet(request):
     except:
         return HttpResponse("false", content_type="application/json")
     return HttpResponse("true", content_type="application/json")
+
+
+def ajax_listAllImagesForModule(request):
+    """List all images for a module."""
+    profile = get_object_or_404(Profile, pk=request.POST.get('profile_id'))
+    region = get_object_or_404(Region, pk=request.POST.get('region_id'))
+    optionset = get_object_or_404(EC2LaunchOptionSet, pk=request.POST.get('id'))
+
+    module = optionset.module
+    images = AWSResource.filter_image_by_module(profile, region, module)
+    images = map(AWSResource.to_dict, images)
+    return HttpResponse(json.dumps(images), content_type="application/json")

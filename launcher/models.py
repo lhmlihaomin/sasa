@@ -52,8 +52,35 @@ class AWSResource(models.Model):
         return [self.name, self.resource_id]
 
     @staticmethod
+    def get_image_version(image_name):
+        pattern = "([adeprtuv]+)-ami-([a-zA-Z_]+)-([\d\._]+)-([a-zA-Z\d]+)-(\d{8})"
+        m = re.match(pattern, image_name)
+        if m is not None:
+            return m.groups()[2]
+        return ""
+
+    @staticmethod
+    def filter_image_by_module(profile, region, module_name):
+        pattern = "([adeprtuv]+)-ami-%s-([\d\._]+)-([a-zA-Z\d]+)-(\d{8})"%(module_name,)
+        ret = []
+        resources = AWSResource.objects.filter(
+            profile=profile,
+            region=region,
+            name__contains=module_name
+        )
+        for r in resources:
+            print(r.name)
+            m = re.match(pattern, r.name)
+            if m is not None:
+                #version = m.groups()[1]
+                #ret.append([r, version])
+                ret.append(r)
+        return ret
+
+    @staticmethod
     def to_dict(obj):
         d = {
+            "id": obj.id,
             "profile": obj.profile.name,
             "region": obj.region.name,
             "name": obj.name,

@@ -2,6 +2,7 @@ from django.conf.urls import url
 
 from . import views
 
+app_name = "launcher"
 urlpatterns = [
     url("^$", views.index, name="index"),
     url("^get_regions_for_profile/(\d+)/$", views.ajax_getRegionsForProfile, name="ajax_getRegionsForProfile"),
@@ -12,5 +13,5 @@ urlpatterns = [
     url("^view_ec2launchoptionset/", views.ajax_viewEC2LaunchOptionSet, name="ajax_viewEC2LaunchOptionSet"),
     url("^save_ec2launchoptionset/", views.ajax_saveEC2LaunchOptionSet, name="ajax_saveEC2LaunchOptionSet"),
     url("^new_ec2launchoptionset/", views.ajax_newEC2LaunchOptionSet, name="ajax_newEC2LaunchOptionSet"),
-    
+    url("^list_all_images_for_module/", views.ajax_listAllImagesForModule, name="ajax_listAllImagesForModule"),
 ]
