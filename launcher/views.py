@@ -81,7 +81,7 @@ def ajax_updateResource(request):
                 awsresource.save()
         return HttpResponse("true", content_type="application/json")
     except AttributeError:
-        return HttpResponse("No such resource type", status_code=400)
+        return HttpResponse("No such resource type", status=400)
     
 
 def ajax_listResources(request):
@@ -115,7 +115,7 @@ def ajax_saveEC2LaunchOptionSet(request):
         jsonobj = json.loads(txt)
         txt = json.dumps(jsonobj, indent=2)
     except:
-        return HttpResponse("Content is not valid JSON.", status_code=400)
+        return HttpResponse("Content is not valid JSON.", status=400)
     # load EC2LaunchOptionSet:
     optionset = get_object_or_404(EC2LaunchOptionSet, pk=request.POST.get("id"))
     # save EC2LaunchOptionSet:
@@ -166,3 +166,29 @@ def ajax_listAllImagesForModule(request):
     images = AWSResource.filter_image_by_module(profile, region, module)
     images = map(AWSResource.to_dict, images)
     return HttpResponse(json.dumps(images), content_type="application/json")
+
+
+def ajax_updateEC2LaunchOptionSet(request):
+    """Update an existing EC2LaunchOptionSet with a new AMI."""
+    optionset = get_object_or_404(EC2LaunchOptionSet, pk=request.POST.get('id'))
+    new_image = get_object_or_404(AWSResource, pk=request.POST.get('image_id'))
+    # data validation:
+    profile = optionset.profile
+    region = optionset.region
+    if profile != new_image.profile or region != new_image.region:
+        return HttpResponse("false", status=400)
+    try:
+        # get and update new version:
+        new_version = AWSResource.get_image_version(new_image.name)
+        optionset.version = new_version
+        # update "image" attribute:
+        attr_image = [new_image.name, new_image.resource_id]
+        attr_dict = json.loads(optionset.content)
+        attr_dict.update({"image": attr_image})
+        optionset.content = json.dumps(attr_dict, indent=2)
+        # remove pk and save as a new one:
+        optionset.pk = None
+        optionset.save()
+        return HttpResponse("true", content_type="application/json")
+    except:
+        return HttpResponse("false", content_type="application/json")

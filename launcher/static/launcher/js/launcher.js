@@ -346,7 +346,7 @@ function listImagesForModule(setId) {
         $('#modalUpdateVersion').modal();
     }
 
-
+    window.EC2LaunchOptionSetId = setId;
     var profileId = $('#selProfile').val();
     var regionId = $('#selRegions').val();
     if (profileId == 0 || regionId == 0) {
@@ -363,5 +363,26 @@ function listImagesForModule(setId) {
         },
         dataType:"json",
         success: showUpdateVersion
+    })
+}
+
+
+function updateEC2LaunchOptionSet() {
+    function onUpdateSuccess(data) {
+        if (data) {
+            listEC2LaunchOptionSets();
+        }
+    }
+
+    var imageId = $('#selListImagesForModule').val();
+    $.ajax({
+        url:"./update_ec2launchoptionset/",
+        method:"post",
+        dataType:"json",
+        data:{
+            id:EC2LaunchOptionSetId,
+            image_id:imageId
+        },
+        success:onUpdateSuccess
     })
 }

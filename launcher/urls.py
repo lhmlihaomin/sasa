@@ -13,5 +13,6 @@ urlpatterns = [
     url("^view_ec2launchoptionset/", views.ajax_viewEC2LaunchOptionSet, name="ajax_viewEC2LaunchOptionSet"),
     url("^save_ec2launchoptionset/", views.ajax_saveEC2LaunchOptionSet, name="ajax_saveEC2LaunchOptionSet"),
     url("^new_ec2launchoptionset/", views.ajax_newEC2LaunchOptionSet, name="ajax_newEC2LaunchOptionSet"),
+    url("^update_ec2launchoptionset/", views.ajax_updateEC2LaunchOptionSet, name="ajax_updateEC2LaunchOptionSet"),
     url("^list_all_images_for_module/", views.ajax_listAllImagesForModule, name="ajax_listAllImagesForModule"),
 ]
