@@ -101,6 +101,7 @@ class EC2LaunchOptionSet(models.Model):
     version = models.CharField(max_length=100)
     az = models.CharField(max_length=10)
     content = models.TextField()
+    enabled = models.BooleanField(default=True)
 
     @property
     def environ(self):
@@ -131,6 +132,13 @@ class EC2LaunchOptionSet(models.Model):
         except:
             return False
         return False
+
+    @property
+    def instance_name_prefix(self):
+        if not self.ami_version_match():
+            raise Exception("Image")
+        return "-".join([self.environ, self.module, self.version, \
+            self.region.name, self.az])
 
     @staticmethod
     def to_dict(obj):

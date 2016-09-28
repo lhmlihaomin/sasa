@@ -15,4 +15,7 @@ urlpatterns = [
     url("^new_ec2launchoptionset/", views.ajax_newEC2LaunchOptionSet, name="ajax_newEC2LaunchOptionSet"),
     url("^update_ec2launchoptionset/", views.ajax_updateEC2LaunchOptionSet, name="ajax_updateEC2LaunchOptionSet"),
     url("^list_all_images_for_module/", views.ajax_listAllImagesForModule, name="ajax_listAllImagesForModule"),
+    url("^run_instances/", views.ajax_runInstances, name="ajax_runInstances"),
+    url("^add_instance_tags/", views.ajax_addInstanceTags, name="ajax_addInstanceTags"),
+    url("^add_volume_tags/", views.ajax_addVolumeTags, name="ajax_addVolumeTags"),
 ]

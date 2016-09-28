@@ -1,0 +1,41 @@
+{
+  "subnets": [
+    [
+      "dev-subnet-a-0", 
+      "subnet-c8f82ead"
+    ]
+  ], 
+  "sourceDestCheck": true, 
+  "instance_profile": [
+    "example", 
+    "arn:aws-cn:iam::681545073814:instance-profile/example"
+  ], 
+  "name": "dev-standard-1.0.0-cn1-a", 
+  "use_default_ebs_settings": false, 
+  "tags": {
+    "Category": "dev", 
+    "Name": "dev-standard-1.0.0-cn1-a"
+  }, 
+  "image": [
+    "dev-ami-standard-1.0.1-cn1-20160927", 
+    "ami-98895df5"
+  ], 
+  "volume_type": "io1", 
+  "volume_size": 20, 
+  "keypair": [
+    "dev-lihaomin", 
+    "dev-lihaomin"
+  ], 
+  "num": 0, 
+  "volume_iops": 100, 
+  "vpc": [
+    "dev-vpc", 
+    "vpc-b7c913d2"
+  ], 
+  "security_group": [
+    "default", 
+    "sg-dd27d3b8"
+  ], 
+  "instance_type": "t2.micro", 
+  "alloc_public_ip": false
+}

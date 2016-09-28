@@ -8,6 +8,7 @@ import boto3
 
 from .models import Profile, Region, AWSResource, EC2LaunchOptionSet
 from .awsresource import AWSResourceHandler
+from .ec2 import run_instances, find_name_tag, add_instance_tags, add_volume_tags
 
 
 # Create your views here.
@@ -21,13 +22,6 @@ def index(request):
     }
 
     return render(request, "launcher/index.html", ctx)
-
-
-"""def update_resources(request):
-    profile = get_object_or_404(Profile, pk=request.POST.get("profile_id"))
-    region = get_object_or_404(Region, request.POST.get("region_id"))
-    boto3_session = boto3.Session(profile_name=profile.name)
-    arh = AWSResourceHandler(profile.account_id, boto3_session)"""
 
 
 def ajax_getRegionsForProfile(request, profile_id):
@@ -97,7 +91,9 @@ def ajax_listEC2LaunchOptionSets(request):
     """Get all EC2LaunchOptionSet objects for a given profile & region."""
     profile = get_object_or_404(Profile, pk=request.POST.get('profile_id'))
     region = get_object_or_404(Region, pk=request.POST.get('region_id'))
-    optionsets = EC2LaunchOptionSet.objects.filter(profile=profile, region=region).order_by('module', 'version')
+    optionsets = EC2LaunchOptionSet.objects\
+        .filter(profile=profile, region=region, enabled=True)\
+        .order_by('module', 'version')
     seq = map(EC2LaunchOptionSet.to_dict, optionsets)
     return HttpResponse(json.dumps(seq), content_type="application/json")
 
@@ -148,7 +144,8 @@ def ajax_newEC2LaunchOptionSet(request):
             module = module,
             version = version,
             az = az,
-            content = txt
+            content = txt,
+            enabled = True
         )
         optionset.save()
     except:
@@ -192,3 +189,38 @@ def ajax_updateEC2LaunchOptionSet(request):
         return HttpResponse("true", content_type="application/json")
     except:
         return HttpResponse("false", content_type="application/json")
+
+
+def ajax_runInstances(request):
+    optionset = get_object_or_404(EC2LaunchOptionSet, pk=request.POST.get('set_id'))
+    count = int(request.POST.get('count'))
+    session = boto3.Session(
+        profile_name=optionset.profile.name,
+        region_name=optionset.region.code
+    )
+    ec2resource = session.resource("ec2")
+    instance_ids = run_instances(ec2resource, optionset, count)
+    return HttpResponse(json.dumps(instance_ids), content_type="application/json")
+
+
+def ajax_addInstanceTags(request):
+    optionset = get_object_or_404(EC2LaunchOptionSet, pk=request.POST.get('set_id'))
+    instance_ids = request.POST.getlist('instance_ids[]')
+    session = boto3.Session(
+        profile_name=optionset.profile.name,
+        region_name=optionset.region.code
+    )
+    ec2resource = session.resource("ec2")
+    result = add_instance_tags(ec2resource, optionset, instance_ids)
+    return HttpResponse(json.dumps(result), content_type="application/json")
+
+def ajax_addVolumeTags(request):
+    optionset = get_object_or_404(EC2LaunchOptionSet, pk=request.POST.get('set_id'))
+    instance_ids = request.POST.getlist('instance_ids[]')
+    session = boto3.Session(
+        profile_name=optionset.profile.name,
+        region_name=optionset.region.code
+    )
+    ec2resource = session.resource("ec2")
+    result = add_volume_tags(ec2resource, instance_ids)
+    return HttpResponse(json.dumps(result), content_type="application/json")

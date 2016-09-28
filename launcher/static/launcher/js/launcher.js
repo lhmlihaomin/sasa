@@ -1,8 +1,4 @@
 function showStartMessage(msg) {
-    /*$('#divMsg').removeClass("alert-success")
-                .removeClass("alert-danger")
-                .addClass("alert-warning")
-                .html(msg);*/
     window.msg = Messenger().post({
         message: msg,
         type: "info"
@@ -11,23 +7,14 @@ function showStartMessage(msg) {
 
 
 function showResultMessage(msg) {
-    /*$('#divMsg').removeClass("alert-warning")
-                .removeClass("alert-danger")
-                .addClass("alert-success")
-                .html(msg);*/
-    window.msg.update({
+    window.msg = Messenger().post({
         message: msg,
-        hideAfter: 5,
-        type: 'success'
-    })
+        type: "success"
+    });
 }
 
 
 function showErrorMessage(msg) {
-    /*$('#divMsg').removeClass("alert-warning")
-                .removeClass("alert-success")
-                .addClass("alert-danger")
-                .html(msg);*/
     Messenger().post({
         message: msg,
         showCloseButton: true,
@@ -197,7 +184,7 @@ function listEC2LaunchOptionSets() {
                         .addClass('btn btn-success')
                         .append($('<i></i>').addClass('fa fa-play'))
                         .prop("title", "Run")
-                        .attr("onclick", "runEC2LaunchOptionSet("+data[i].id+")")
+                        .attr("onclick", "runInstances("+data[i].id+")")
                 )
             var tr = $('<tr></tr>')
                 .append('<td>'+data[i].module+'</td>')
@@ -386,3 +373,97 @@ function updateEC2LaunchOptionSet() {
         success:onUpdateSuccess
     })
 }
+
+
+function runInstances(setId) {
+    function onRunInstancesSuccess(data) {
+        var instance_ids = data;
+        showResultMessage("These instances has been launched: "+instance_ids);
+        addInstanceTags(instance_ids);
+    }
+
+    window.EC2LaunchOptionSetId = setId;
+    var num = Number(prompt("Input instance count:"))
+    if (isNaN(num)) {
+        showErrorMessage("Please input a number.");
+        return false;
+    }
+    num = Math.floor(num);
+    if (num <= 0) {
+        showErrorMessage("Instance count must be greater than 0.");
+        return false;
+    }
+
+    showStartMessage("Launching instances ...");
+    $.ajax({
+        url:"./run_instances/",
+        method:"post",
+        dataType:"json",
+        data:{
+            set_id:setId,
+            count: num
+        },
+        success: onRunInstancesSuccess
+    })
+}
+
+
+function addInstanceTags(instance_ids) {
+    function onAddInstanceTagsSuccess(data) {
+        var txt = "Instance tags: ";
+        var instance_ids = [];
+        for (var key in data) {
+            txt += " ["+key+": "+data[key]+"] ";
+            instance_ids.push(key)
+        }
+        showResultMessage(txt)
+        addVolumeTags(instance_ids)
+    }
+
+    showStartMessage("Applying tags to instances: "+instance_ids);
+    $.ajax({
+        url:"./add_instance_tags/",
+        method:"post",
+        dataType:"json",
+        data:{
+            set_id: window.EC2LaunchOptionSetId,
+            instance_ids: instance_ids
+        },
+        success: onAddInstanceTagsSuccess
+    })
+}
+
+
+function addVolumeTags(instance_ids) {
+    function onAddVolumeTagsSuccess(data) {
+        var txt = "Instance volume tags: ";
+        var instance_ids = [];
+        for (var key in data) {
+            txt += " ["+key+": "+data[key]+"] ";
+            instance_ids.push(key)
+        }
+        showResultMessage(txt)
+    }
+
+    showStartMessage("Applying tags to instance volumes: "+instance_ids)
+    $.ajax({
+        url:"./add_volume_tags/",
+        method:"post",
+        dataType:"json",
+        data:{
+            set_id: window.EC2LaunchOptionSetId,
+            instance_ids: instance_ids
+        },
+        success: onAddVolumeTagsSuccess
+    })
+}
+/*$.ajax({
+  url:"./add_instance_tags/",
+  method:"post",
+  dataType:"json",
+  data:{
+    set_id:125,
+    instance_ids:["i-cccafaf4", "i-cfcafaf7"]
+  },
+  success:console.log
+})*/
