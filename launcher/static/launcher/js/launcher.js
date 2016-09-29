@@ -147,7 +147,7 @@ function listEC2LaunchOptionSets() {
             var panelBody = $('<div></div>').addClass("panel-body").prop("id", "panelBody_"+module);
             var moduleTable = $('<table></table>')
                 .addClass("table table-hover")
-                .append($('<thead><tr><th>MODULE</th><th>VERSION</th><th>REGION</th><th>AZ</th><th style="width:150px;"></th></tr></thead>'))
+                .append($('<thead><tr><th>MODULE</th><th>VERSION</th><th>REGION</th><th>AZ</th><th style="width:80px;"></th></tr></thead>'))
                 .append($('<tbody></tbody>').prop('id', 'tbody_'+module))
                 .appendTo(panelBody);
             var panelModule = $('<div></div>')
@@ -162,7 +162,7 @@ function listEC2LaunchOptionSets() {
             var module = data[i].module;
             var panelBody = makeModulePanel(module);
             var tbody = $('#tbody_'+module);
-            var tdActions = $('<td></td>')
+            /*var tdActions = $('<td></td>')
                 .append(
                     $('<button></button>')
                         .addClass('btn btn-primary')
@@ -185,7 +185,20 @@ function listEC2LaunchOptionSets() {
                         .append($('<i></i>').addClass('fa fa-play'))
                         .prop("title", "Run")
                         .attr("onclick", "runInstances("+data[i].id+")")
-                )
+                )*/
+
+            var tdActions = $(
+'<td><div class="btn-group">\
+    <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">\
+Action <span class="caret"></span>\
+    </button>\
+    <ul class="dropdown-menu" role="menu">\
+        <li><a class="actionLink" onclick="viewEC2LaunchOptionSet('+data[i].id+')"><i class="fa fa-list"></i> View & Edit</a></li>\
+        <li><a class="actionLink" onclick="listImagesForModule('+data[i].id+')"><i class="fa fa-arrow-up"></i> Update Version</a></li>\
+        <li><a class="actionLink" onclick="runInstances('+data[i].id+')"><i class="fa fa-play"></i> Run Instances</a></li>\
+    </ul>\
+</div></td>');
+
             var tr = $('<tr></tr>')
                 .append('<td>'+data[i].module+'</td>')
                 .append('<td>'+data[i].version+'</td>')
