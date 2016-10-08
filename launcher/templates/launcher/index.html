@@ -65,26 +65,12 @@
             <div id="page-wrapper" style="min-height: 726px;">
                 <div class="row" style="padding-top:20px;">
 
+                    <!-- COL0: MARGIN LEFT -->
+                    <div class="col-lg-1"></div>
                     <!-- COL1: OPTION SET LIST -->
-                    <div class="col-lg-6" id="divEC2LaunchOptionSetList"></div>
-                    <!-- /COL1 -->
-
-                    <!-- COL2: JSON EDITOR -->
-                    <div class="col-lg-6">
-                        <div class="panel panel-green">
-                            <div id="divEC2LaunchOptionSetTitle" class="panel-heading">EC2 LAUNCH OPTION SET DETAIL</div>
-                            <div class="panel-body" style="height: 680px;">
-                                <div id="divAceEditorContainer">
-                                    <div id="aceEditor" style="position:absolute; width:640px; height:640px; font-size:14px;">"Nothing loaded."</div>
-                                </div>
-                            </div>
-                            <div class="panel-footer">
-                                <button type="button" class="btn btn-danger" onclick="editor.setValue('')">Clear</button>
-                                <button type="button" class="btn btn-primary" onclick="saveEC2LaunchOptionSet()">Save</button>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- /COL2 -->
+                    <div class="col-lg-10" id="divEC2LaunchOptionSetList"></div>
+                    <!-- COL2: MARGIN RIGHT -->
+                    <div class="col-lg-1"></div>
 
                 </div>
             </div>
@@ -123,7 +109,7 @@
         <!-- /RESOURCES LIST MODAL -->
 
 
-        <!-- CREATE NEW OPTION SET -->
+        <!-- CREATE NEW OPTION SET MODAL -->
         <div id="modalNew" class="modal fade" aria-hidden="true" aria-labelledby="modalLabelNew" role="dialog" tabindex="-1">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content" style="width: auto;">
@@ -165,9 +151,9 @@
                 </div>
             </div>
         </div>
-        <!-- /CREATE NEW OPTION SET --> 
+        <!-- /CREATE NEW OPTION SET MODAL --> 
 
-         <!-- UPDATE VERSION -->
+         <!-- UPDATE VERSION MODAL -->
         <div id="modalUpdateVersion" class="modal fade" aria-hidden="true" aria-labelledby="modalLabelUpdateVersion" role="dialog" tabindex="-1">
             <div class="modal-dialog">
                 <div class="modal-content" style="width: auto;">
@@ -176,19 +162,91 @@
                         <h4 id="modalLabelUpdateVersion" class="modal-title">UPDATE MODULE VERSION</h4>
                     </div>
                     <div id="divUpdateVersion" class="modal-body">
-                        <div class="input-group">
-                            <label>SELECT AN IMAGE FOR NEW VERSION: </label>
-                            <select class="form-control" id="selListImagesForModule"></select>
-                        </div>
+                        
                     </div>
                     <div class="modal-footer">
-                        <button class="btn btn-primary" type="button" onclick="updateEC2LaunchOptionSet()">Create</button>
-                        <button data-dismiss="modal" class="btn btn-default" type="button">Close</button>
+                        
                     </div>
                 </div>
             </div>
         </div>
-        <!-- /CREATE NEW OPTION SET --> 
+        <!-- /UPDATE VERSION MODAL --> 
+
+        <!-- DETAIL & OPERATION MODAL -->
+        <div id="modalDetail" class="modal fade" aria-hidden="true" aria-labelledby="modalLabelDetail" role="dialog" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content" style="width: auto;">
+                    <div class="modal-header">
+                        <button class="close" aria-hidden="true" data-dismiss="modal" type="button">x</button>
+                        <h4 id="modalLabelDetail" class="modal-title">DETAIL & OPERATIONS</h4>
+                    </div>
+                    <div id="divDetail" class="modal-body">
+                        
+
+                        <!-- DETAIL & OPERATION TABS -->
+                        <ul class="nav nav-tabs">
+                            <li class="active">
+                                <a href="#json_editor" data-toggle="tab" aria-expanded="true" id="a_detail" onclick="viewEC2LaunchOptionSet(EC2LaunchOptionSetId);">Detail</a>
+                            </li>
+                            <li>
+                                <a href="#ami_versions" data-toggle="tab" aria-expanded="true" id="a_ami_versions" onclick="listImagesForModule(EC2LaunchOptionSetId)">Versions</a>
+                            </li>
+                            <li>
+                                <a href="#instances" data-toggle="tab" aria-expanded="true" id="a_instances">Instances</a>
+                            </li>
+                        </ul>
+                        <div class="tab-content">
+
+                            <!-- TAB PANE 1: DETAIL -->
+                            <div class="tab-pane fade in active" id="json_editor">
+                                <div class="panel panel-default">
+                                    <div id="divEC2LaunchOptionSetTitle" class="panel-heading">EC2 LAUNCH OPTION SET DETAIL</div>
+                                    <div class="panel-body" style="height: 520px;">
+                                        <div id="divAceEditorContainer">
+                                            <div id="aceEditor" style="position:absolute; width:640px; height:480px; font-size:14px;">"Nothing loaded."</div>
+                                        </div>
+                                    </div>
+                                    <div class="panel-footer">
+                                        <button data-dismiss="modal" class="btn btn-default" type="button">Close</button>
+                                        <button type="button" class="btn btn-danger" onclick="editor.setValue('')">Clear</button>
+                                        <button type="button" class="btn btn-primary" onclick="saveEC2LaunchOptionSet()">Save</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- /TAB PANE 1 -->
+
+                            <!-- TAB PANE 2: AMI VERSIONS -->
+                            <div class="tab-pane fade" id="ami_versions">
+                                <div class="panel panel-default">
+                                    <div id="divHeadingUpdateVersion" class="panel-heading">UPDATE VERSION</div>
+                                    <div class="panel-body">
+                                        <div class="input-group">
+                                            <label>SELECT AN IMAGE FOR NEW VERSION: </label>
+                                            <select class="form-control" id="selListImagesForModule"></select>
+                                        </div>
+                                    </div>
+                                    <div class="panel-footer">
+                                        <button data-dismiss="modal" class="btn btn-default" type="button">Close</button>
+                                        <button class="btn btn-primary" type="button" onclick="updateEC2LaunchOptionSet()">Create</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- /TAB PANE 2 -->
+
+                            <!-- TAB PANE 3: INSTANCES -->
+                            <div class="tab-pane fade" id="instances">TO BE DONE ...</div>
+                            <!-- /TAB PANE 3 -->
+
+                        </div>
+                        <!-- /DETAIL & OPERATION TABS -->
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /DETAIL & OPERATION MODAL -->
+
 
         <script src="{% static 'launcher/js/jquery-1.12.4.min.js' %}"></script>
         <script src="{% static 'launcher/js/bootstrap.min.js' %}"></script>

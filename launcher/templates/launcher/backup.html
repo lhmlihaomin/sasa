@@ -1,3 +1,15 @@
+<!-- A PANEL -->
+<div class="panel panel-default">
+    <div id="panelId" class="panel-heading">HEADING TEXT</div>
+    <div class="panel-body">
+        BODY CONTENT
+    </div>
+    <div class="panel-footer">
+        FOOTER CONTENT
+    </div>
+</div>
+<!-- /A PANEL -->
+
  <div class="col-lg-6">
                         <div class="panel panel-green">
                             <div class="panel-heading">CONFIG DETAIL</div>
@@ -59,3 +71,20 @@
                             </div>
                         </div>
                     </div>
+
+
+
+
+<!-- JSON EDITOR -->
+                        <div class="panel panel-green">
+                            <div id="divEC2LaunchOptionSetTitle" class="panel-heading">EC2 LAUNCH OPTION SET DETAIL</div>
+                            <div class="panel-body" style="height: 680px;">
+                                <div id="divAceEditorContainer">
+                                    <div id="aceEditor" style="position:absolute; width:640px; height:640px; font-size:14px;">"Nothing loaded."</div>
+                                </div>
+                            </div>
+                            <div class="panel-footer">
+                                <button type="button" class="btn btn-danger" onclick="editor.setValue('')">Clear</button>
+                                <button type="button" class="btn btn-primary" onclick="saveEC2LaunchOptionSet()">Save</button>
+                            </div>
+                        </div>

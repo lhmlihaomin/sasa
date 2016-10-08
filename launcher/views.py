@@ -187,8 +187,8 @@ def ajax_updateEC2LaunchOptionSet(request):
         optionset.pk = None
         optionset.save()
         return HttpResponse("true", content_type="application/json")
-    except:
-        return HttpResponse("false", content_type="application/json")
+    except Exception as ex:
+        return HttpResponse(json.dumps(ex.message), content_type="application/json")
 
 
 def ajax_runInstances(request):

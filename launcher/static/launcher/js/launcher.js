@@ -232,12 +232,18 @@ Action <span class="caret"></span>\
 
 function viewEC2LaunchOptionSet(setId) {
     function showEC2LaunchOptionSet(data) {
+        /*
+        editor.setValue("");
+        editor.setValue(data.content);
+        window.EC2LaunchOptionSetId = data.id;*/
+        //$("#modalViewEC2LaunchOptionSet").modal();
         $('#divEC2LaunchOptionSetTitle')
             .html("DETAIL: "+[data.environ, data.module, data.version, data.region, data.az].join("-"));
         editor.setValue("");
         editor.setValue(data.content);
         window.EC2LaunchOptionSetId = data.id;
-        //$("#modalViewEC2LaunchOptionSet").modal();
+        $('#modalDetail').modal();
+        $('#a_detail').tab('show');
     }
     $.ajax({
         url: "./view_ec2launchoptionset/",
@@ -343,7 +349,12 @@ function listImagesForModule(setId) {
                 .attr('value', data[i].id)
                 .appendTo(sel);
         }
-        $('#modalUpdateVersion').modal();
+        //$('#modalUpdateVersion').modal();
+        //$('#divHeadingUpdateVersion')
+        //    .html([data.environ, data.module, data.version, data.region, data.az].join("-"));
+        window.EC2LaunchOptionSetId = setId;
+        $('#modalDetail').modal();
+        $('#a_ami_versions').tab('show');
     }
 
     window.EC2LaunchOptionSetId = setId;
