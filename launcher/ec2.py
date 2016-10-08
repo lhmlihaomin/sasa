@@ -26,22 +26,22 @@ def run_instances(ec2res, optionset, count):
             #'NoDevice': ''
         }
         block_device_mappings = [bdm]
-        # try to run instances:
-        try:
-            instances = ec2res.create_instances(
-                ImageId=opset['image'][1],
-                MinCount=count,
-                MaxCount=count,
-                KeyName=opset['keypair'][1],
-                SecurityGroupIds=[opset['security_group'][1]],
-                InstanceType=opset['instance_type'],
-                BlockDeviceMappings=block_device_mappings,
-                SubnetId=opset['subnets'][0][1],
-            )
-            instance_ids = [x.id for x in instances]
-            return instance_ids
-        except Exception as ex:
-            raise ex
+    # try to run instances:
+    try:
+        instances = ec2res.create_instances(
+            ImageId=opset['image'][1],
+            MinCount=count,
+            MaxCount=count,
+            KeyName=opset['keypair'][1],
+            SecurityGroupIds=[opset['security_group'][1]],
+            InstanceType=opset['instance_type'],
+            BlockDeviceMappings=block_device_mappings,
+            SubnetId=opset['subnets'][0][1],
+        )
+        instance_ids = [x.id for x in instances]
+        return instance_ids
+    except Exception as ex:
+        raise ex
 
 def find_name_tag(instance):
     for tagpair in instance.tags:
