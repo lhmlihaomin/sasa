@@ -29,13 +29,16 @@ def run_instances(ec2res, optionset, count):
     # try to run instances:
     try:
         instances = ec2res.create_instances(
+            BlockDeviceMappings=block_device_mappings,
+            IamInstanceProfile={
+                'Arn': opset['instance_profile'][1]
+            },
             ImageId=opset['image'][1],
+            InstanceType=opset['instance_type'],
+            KeyName=opset['keypair'][1],
             MinCount=count,
             MaxCount=count,
-            KeyName=opset['keypair'][1],
             SecurityGroupIds=[opset['security_group'][1]],
-            InstanceType=opset['instance_type'],
-            BlockDeviceMappings=block_device_mappings,
             SubnetId=opset['subnets'][0][1],
         )
         instance_ids = [x.id for x in instances]
