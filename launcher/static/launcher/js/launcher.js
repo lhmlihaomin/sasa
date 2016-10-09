@@ -193,9 +193,9 @@ function listEC2LaunchOptionSets() {
 Action <span class="caret"></span>\
     </button>\
     <ul class="dropdown-menu" role="menu">\
-        <li><a class="actionLink" onclick="viewEC2LaunchOptionSet('+data[i].id+')"><i class="fa fa-list"></i> View & Edit</a></li>\
+        <li><a class="actionLink" onclick="viewEC2LaunchOptionSet('+data[i].id+')"><i class="fa fa-edit"></i> View & Edit</a></li>\
         <li><a class="actionLink" onclick="listImagesForModule('+data[i].id+')"><i class="fa fa-arrow-up"></i> Update Version</a></li>\
-        <li><a class="actionLink" onclick="runInstances('+data[i].id+')"><i class="fa fa-play"></i> Run Instances</a></li>\
+        <li><a class="actionLink" onclick="listInstancesForEC2LaunchOptionSet('+data[i].id+')"><i class="fa fa-list"></i> Manage Instances</a></li>\
     </ul>\
 </div></td>');
 
@@ -242,6 +242,8 @@ function viewEC2LaunchOptionSet(setId) {
         editor.setValue("");
         editor.setValue(data.content);
         window.EC2LaunchOptionSetId = data.id;
+        // clear online instances in table, becausing we are changing active optionset:
+        clearOnlineInstances();
         $('#modalDetail').modal();
         $('#a_detail').tab('show');
     }
@@ -282,12 +284,6 @@ function saveEC2LaunchOptionSet() {
         },
         error: function() {showErrorMessage("Save failed.");}
     })
-    console.log(EC2LaunchOptionSetId)
-}
-
-
-function runEC2LaunchOptionSet(setId) {
-    console.log(setId);
 }
 
 
@@ -358,6 +354,8 @@ function listImagesForModule(setId) {
     }
 
     window.EC2LaunchOptionSetId = setId;
+    // clear online instances in table, becausing we are changing active optionset:
+    clearOnlineInstances();
     var profileId = $('#selProfile').val();
     var regionId = $('#selRegions').val();
     if (profileId == 0 || regionId == 0) {
@@ -466,7 +464,10 @@ function addVolumeTags(instance_ids) {
             txt += " ["+key+": "+data[key]+"] ";
             instance_ids.push(key)
         }
-        showResultMessage(txt)
+        showResultMessage(txt);
+        // clear online instances in table, becausing we are changing active optionset:
+        clearOnlineInstances();
+        refreshOnlineInstances(window.EC2LaunchOptionSetId);
     }
 
     showStartMessage("Applying tags to instance volumes: "+instance_ids)
@@ -481,13 +482,167 @@ function addVolumeTags(instance_ids) {
         success: onAddVolumeTagsSuccess
     })
 }
-/*$.ajax({
-  url:"./add_instance_tags/",
-  method:"post",
-  dataType:"json",
-  data:{
-    set_id:125,
-    instance_ids:["i-cccafaf4", "i-cfcafaf7"]
-  },
-  success:console.log
-})*/
+
+
+function clearOnlineInstances() {
+    $('#spanOnlineInstances').html('(Click "Refresh" to load instances)');
+    var tbody = $('#tbodyOnlineInstances');
+    tbody.empty();
+}
+
+
+function refreshOnlineInstances(setId) {
+    function showListInstancesForEC2LaunchOptionSet(data) {
+        var tbody = $('#tbodyOnlineInstances');
+        tbody.empty();
+        $('#spanOnlineInstances').html("ONLINE INSTANCES: "+data.length);
+        for (var i=0; i<data.length; i++) {
+            var btnStart = $('<button class="btn btn-primary" title="Start"><i class="fa fa-play"></i></button>')
+                .click(function(i) {return function() {startInstance(data[i].id);}}(i));
+            var btnStop = $('<button class="btn btn-primary" title="Stop"><i class="fa fa-stop"></i></button>')
+                .click(function(i) {return function() {stopInstance(data[i].id);}}(i));
+            var btnTerminate = $('<button class="btn btn-primary" title="Terminate"><i class="fa fa-trash-o"></i></button>')
+                .click(function(i) {return function() {terminateInstance(data[i].id);}}(i));
+            var tr = $('<tr><td>'
+                +data[i].id+'</td><td>'
+                +data[i].name+'</td><td>'
+                +data[i].state+'</td></tr>');
+            var td = $('<td></td>')
+                .append(btnStart)
+                .append(btnStop)
+                .append(btnTerminate)
+                .appendTo(tr)
+            tr.appendTo(tbody);
+        }
+    }
+
+    window.EC2LaunchOptionSetId = setId;
+    clearOnlineInstances();
+    if (setId == 0) {
+        showErrorMessage("Nothing selected.");
+        return;
+    }
+    $('#spanOnlineInstances').html("LOADING ...");
+    $.ajax({
+        url: './list_instances_for_ec2launchoptionset/',
+        method: 'get',
+        data: {
+            set_id: setId
+        },
+        dataType: 'json',
+        success: showListInstancesForEC2LaunchOptionSet
+    })
+}
+
+
+function listInstancesForEC2LaunchOptionSet(setId) {
+    $('#modalDetail').modal();
+    $('#a_instances').tab('show');
+
+    refreshOnlineInstances(setId);
+}
+
+
+function startInstance(instanceId) {
+    if (!confirm("Are you sure to [START] instance: "+instanceId+"?")) {
+        return false;
+    }
+    var profileId = $('#selProfile').val();
+    var regionId = $('#selRegions').val();
+    if (profileId == 0 || regionId == 0) {
+        showErrorMessage("You need to select a profile/region first.");
+        return false;
+    }
+    $.ajax({
+        url: "./start_instance/",
+        method: "post",
+        data: {
+            profile_id: profileId,
+            region_id: regionId,
+            instance_id: instanceId,
+        },
+        dataType: "json",
+        success: function(data){
+            alert(data);
+            refreshOnlineInstances(window.EC2LaunchOptionSetId);
+        }
+    })
+}
+
+
+function stopInstance(instanceId) {
+    if (!confirm("Are you sure to [STOP] instance: "+instanceId+"?")) {
+        return false;
+    }
+    var profileId = $('#selProfile').val();
+    var regionId = $('#selRegions').val();
+    if (profileId == 0 || regionId == 0) {
+        showErrorMessage("You need to select a profile/region first.");
+        return false;
+    }
+    $.ajax({
+        url: "./stop_instance/",
+        method: "post",
+        data: {
+            profile_id: profileId,
+            region_id: regionId,
+            instance_id: instanceId,
+        },
+        dataType: "json",
+        success: function(data){
+            alert(data);
+            refreshOnlineInstances(window.EC2LaunchOptionSetId);    
+        }
+    })
+}
+
+
+function terminateInstance(instanceId) {
+    if (!confirm("Are you sure to [TERMINATE] instance: "+instanceId+"?")) {
+        return false;
+    }
+    var profileId = $('#selProfile').val();
+    var regionId = $('#selRegions').val();
+    if (profileId == 0 || regionId == 0) {
+        showErrorMessage("You need to select a profile/region first.");
+        return false;
+    }
+    $.ajax({
+        url: "./terminate_instance/",
+        method: "post",
+        data: {
+            profile_id: profileId,
+            region_id: regionId,
+            instance_id: instanceId,
+        },
+        dataType: "json",
+        success: function(data){
+            alert(data);
+            refreshOnlineInstances(window.EC2LaunchOptionSetId);
+        }
+    })
+}
+
+
+function stopAllInstances() {
+    var setId = window.EC2LaunchOptionSetId;
+    if (0 == setId) {
+        showErrorMessage("Nothing selected.");
+        return false;
+    }
+    if (!confirm("Are you sure to [STOP ALL] instances?")) {
+        return false;
+    }
+    $.ajax({
+        url: "./stop_all_instances/",
+        method: "post",
+        data: {
+            set_id: setId
+        },
+        dataType: "json",
+        success: function(data){
+            alert(data);
+            refreshOnlineInstances(window.EC2LaunchOptionSetId);
+        }
+    })
+}

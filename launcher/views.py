@@ -8,8 +8,12 @@ import boto3
 
 from .models import Profile, Region, AWSResource, EC2LaunchOptionSet
 from .awsresource import AWSResourceHandler
-from .ec2 import run_instances, find_name_tag, add_instance_tags, add_volume_tags
+from .ec2 import run_instances, find_name_tag, add_instance_tags, \
+add_volume_tags, get_instances_for_ec2launchoptionset
 
+
+def JSONResponse(obj):
+    return HttpResponse(json.dumps(obj), content_type="application/json")
 
 # Create your views here.
 def index(request):
@@ -28,7 +32,7 @@ def ajax_getRegionsForProfile(request, profile_id):
     """Get all available regions for a given profile."""
     regions = get_object_or_404(Profile, pk=profile_id).region_set.all()
     regions = map(Region.to_dict, regions)
-    return HttpResponse(json.dumps(regions), content_type="application/json")
+    return JSONResponse(regions)
 
 
 def ajax_clearResources(request):
@@ -38,7 +42,7 @@ def ajax_clearResources(request):
     awsresources = AWSResource.objects.filter(profile=profile, region=region).order_by("-resource_type")
     for awsresource in awsresources:
         awsresource.delete()
-    return HttpResponse("true", content_type="application/json")
+    return JSONResponse(True)
 
 def ajax_updateResource(request):
     """Update one resource type for the given profile & region."""
@@ -73,7 +77,7 @@ def ajax_updateResource(request):
                 awsresource.save()
             else:
                 awsresource.save()
-        return HttpResponse("true", content_type="application/json")
+        return JSONResponse(True)
     except AttributeError:
         return HttpResponse("No such resource type", status=400)
     
@@ -84,7 +88,7 @@ def ajax_listResources(request):
     region = get_object_or_404(Region, pk=request.POST.get('region_id'))
     awsresources = AWSResource.objects.filter(profile=profile, region=region).order_by("-resource_type")
     seq = map(AWSResource.to_dict, awsresources)
-    return HttpResponse(json.dumps(seq), content_type="application/json")
+    return JSONResponse(seq)
 
 
 def ajax_listEC2LaunchOptionSets(request):
@@ -95,7 +99,7 @@ def ajax_listEC2LaunchOptionSets(request):
         .filter(profile=profile, region=region, enabled=True)\
         .order_by('module', 'version')
     seq = map(EC2LaunchOptionSet.to_dict, optionsets)
-    return HttpResponse(json.dumps(seq), content_type="application/json")
+    return JSONResponse(seq)
 
 def ajax_viewEC2LaunchOptionSet(request):
     """Get the detailed information on a given EC2LaunchOptionSet."""
@@ -117,7 +121,7 @@ def ajax_saveEC2LaunchOptionSet(request):
     # save EC2LaunchOptionSet:
     optionset.content = txt
     optionset.save()
-    return HttpResponse("true", content_type="application/json")
+    return JSONResponse(True)
 
 
 def ajax_newEC2LaunchOptionSet(request):
@@ -128,14 +132,14 @@ def ajax_newEC2LaunchOptionSet(request):
     version = request.POST.get('version')
     az = request.POST.get('az')
     if len(module) * len(version) * len(az) == 0:
-        return HttpResponse("false", content_type="application/json")
+        return JSONResponse(False)
     # check JSON syntax:
     txt = request.POST.get('content')
     try:
         jsonobj = json.loads(txt)
         txt = json.dumps(jsonobj, indent=2)
     except:
-        return HttpResponse("false", content_type="application/json")
+        return JSONResponse(False)
     # create the option set:
     try:
         optionset = EC2LaunchOptionSet(
@@ -149,8 +153,8 @@ def ajax_newEC2LaunchOptionSet(request):
         )
         optionset.save()
     except:
-        return HttpResponse("false", content_type="application/json")
-    return HttpResponse("true", content_type="application/json")
+        return JSONResponse(False)
+    return JSONResponse(True)
 
 
 def ajax_listAllImagesForModule(request):
@@ -162,7 +166,7 @@ def ajax_listAllImagesForModule(request):
     module = optionset.module
     images = AWSResource.filter_image_by_module(profile, region, module)
     images = map(AWSResource.to_dict, images)
-    return HttpResponse(json.dumps(images), content_type="application/json")
+    return JSONResponse(images)
 
 
 def ajax_updateEC2LaunchOptionSet(request):
@@ -186,9 +190,9 @@ def ajax_updateEC2LaunchOptionSet(request):
         # remove pk and save as a new one:
         optionset.pk = None
         optionset.save()
-        return HttpResponse("true", content_type="application/json")
+        return JSONResponse(True)
     except Exception as ex:
-        return HttpResponse(json.dumps(ex.message), content_type="application/json")
+        return JSONResponse(ex.message)
 
 
 def ajax_runInstances(request):
@@ -200,7 +204,7 @@ def ajax_runInstances(request):
     )
     ec2resource = session.resource("ec2")
     instance_ids = run_instances(ec2resource, optionset, count)
-    return HttpResponse(json.dumps(instance_ids), content_type="application/json")
+    return JSONResponse(instance_ids)
 
 
 def ajax_addInstanceTags(request):
@@ -212,7 +216,8 @@ def ajax_addInstanceTags(request):
     )
     ec2resource = session.resource("ec2")
     result = add_instance_tags(ec2resource, optionset, instance_ids)
-    return HttpResponse(json.dumps(result), content_type="application/json")
+    return JSONResponse(result)
+
 
 def ajax_addVolumeTags(request):
     optionset = get_object_or_404(EC2LaunchOptionSet, pk=request.POST.get('set_id'))
@@ -223,4 +228,107 @@ def ajax_addVolumeTags(request):
     )
     ec2resource = session.resource("ec2")
     result = add_volume_tags(ec2resource, instance_ids)
-    return HttpResponse(json.dumps(result), content_type="application/json")
+    return JSONResponse(result)
+
+
+def ajax_listInstancesForEC2LaunchOptionSet(request):
+    optionset = get_object_or_404(EC2LaunchOptionSet, pk=request.GET.get('set_id'))
+    session = boto3.Session(
+        profile_name=optionset.profile.name,
+        region_name=optionset.region.code
+    )
+    ec2resource = session.resource("ec2")
+    instances = get_instances_for_ec2launchoptionset(ec2resource, optionset)
+    return JSONResponse(instances)
+
+
+def ajax_startInstance(request):
+    profile = get_object_or_404(Profile, pk=request.POST.get('profile_id'))
+    region = get_object_or_404(Region, pk=request.POST.get('region_id'))
+    session = boto3.Session(
+        profile_name=profile.name,
+        region_name=region.code
+    )
+    instance_id = request.POST.get("instance_id")
+    ec2resource = session.resource("ec2")
+    instance = ec2resource.Instance(instance_id)
+    try:
+        #resp = instance.start(DryRun=True)
+        resp = instance.start()
+    except Exception as ex:
+        return JSONResponse(ex.message)
+    msg = "Instance state: %s --> %s."%(
+        resp['StartingInstances'][0]['PreviousState']['Name'],
+        resp['StartingInstances'][0]['CurrentState']['Name'],
+    )
+    return JSONResponse(msg)
+
+
+def ajax_stopInstance(request):
+    profile = get_object_or_404(Profile, pk=request.POST.get('profile_id'))
+    region = get_object_or_404(Region, pk=request.POST.get('region_id'))
+    session = boto3.Session(
+        profile_name=profile.name,
+        region_name=region.code
+    )
+    instance_id = request.POST.get("instance_id")
+    ec2resource = session.resource("ec2")
+    instance = ec2resource.Instance(instance_id)
+    try:
+        #instance.stop(DryRun=True)
+        resp = instance.stop()
+    except Exception as ex:
+        return JSONResponse(ex.message)
+    msg = "Instance state: %s --> %s."%(
+        resp['StoppingInstances'][0]['PreviousState']['Name'],
+        resp['StoppingInstances'][0]['CurrentState']['Name'],
+    )
+    return JSONResponse(msg)
+    
+
+
+def ajax_terminateInstance(request):
+    profile = get_object_or_404(Profile, pk=request.POST.get('profile_id'))
+    region = get_object_or_404(Region, pk=request.POST.get('region_id'))
+    session = boto3.Session(
+        profile_name=profile.name,
+        region_name=region.code
+    )
+    instance_id = request.POST.get("instance_id")
+    ec2resource = session.resource("ec2")
+    instance = ec2resource.Instance(instance_id)
+    try:
+        #instance.terminate(DryRun=True)
+        resp = instance.terminate()
+    except Exception as ex:
+        return JSONResponse(ex.message)
+    msg = "Instance state: %s --> %s."%(
+        resp['TerminatingInstances'][0]['PreviousState']['Name'],
+        resp['TerminatingInstances'][0]['CurrentState']['Name'],
+    )
+    return JSONResponse(msg)
+
+
+def ajax_stopAllInstances(request):
+    optionset = get_object_or_404(EC2LaunchOptionSet, pk=request.POST.get('set_id'))
+    session = boto3.Session(
+        profile_name=optionset.profile.name,
+        region_name=optionset.region.code
+    )
+    ec2resource = session.resource("ec2")
+    instances = get_instances_for_ec2launchoptionset(ec2resource, optionset)
+    instance_ids = []
+    for instance in instances:
+        if instance['state'] not in ['terminated', 'shutting-down']:
+            instance_ids.append(instance['id'])
+    try:
+        ec2client = session.client("ec2")
+        resp = ec2client.stop_instances(InstanceIds=instance_ids)
+    except Exception as ex:
+        return JSONResponse(ex.message)
+    msg = "Instance states: \n "
+    for stopping_instance in resp['StoppingInstances']:
+        msg += "%s: %s -> %s \n "%(stopping_instance['InstanceId'],
+                                   stopping_instance['PreviousState']['Name'],
+                                   stopping_instance['CurrentState']['Name'])
+    return JSONResponse(msg)

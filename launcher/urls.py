@@ -18,4 +18,9 @@ urlpatterns = [
     url("^run_instances/", views.ajax_runInstances, name="ajax_runInstances"),
     url("^add_instance_tags/", views.ajax_addInstanceTags, name="ajax_addInstanceTags"),
     url("^add_volume_tags/", views.ajax_addVolumeTags, name="ajax_addVolumeTags"),
+    url("^list_instances_for_ec2launchoptionset/", views.ajax_listInstancesForEC2LaunchOptionSet, name="ajax_listInstancesForEC2LaunchOptionSet"),
+    url("^start_instance/", views.ajax_startInstance, name="ajax_startInstance"),
+    url("^stop_instance/", views.ajax_stopInstance, name="ajax_stopInstance"),
+    url("^terminate_instance/", views.ajax_terminateInstance, name="ajax_terminateInstance"),
+    url("^stop_all_instances/", views.ajax_stopAllInstances, name="ajax_stopAllInstances"),
 ]

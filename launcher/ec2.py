@@ -75,7 +75,7 @@ def add_instance_tags(ec2res, optionset, instance_ids):
             },
             {
                 'Name': 'instance-state-name',
-                'Values': ['running']
+                'Values': ['running', 'stopped', 'stopping', 'pending']
             }
         ]
     )
@@ -126,4 +126,49 @@ def add_volume_tags(ec2res, instance_ids):
             ret.update({instance.id: True})
         except Exception as ex:
             ret.update({instance.id: False})
+    return ret
+
+
+def get_instances_for_ec2launchoptionset(ec2res, optionset):
+    def name_cmp(x, y):
+        """Compare instance names.
+        
+        For modules with +10 instances, string length needs to be considered, 
+        otherwise 'xxx-9' will be greater than 'xxx-10'."""
+        len_x = len(x)
+        len_y = len(y)
+        if len_x < len_y:
+            return -1
+        if len_x > len_y:
+            return 1
+        if x < y:
+            return -1
+        if x > y:
+            return 1
+        return 0
+
+    ret = []
+    prefix = optionset.instance_name_prefix
+    # list instances with the same prefix:
+    instances = ec2res.instances.filter(
+        Filters=[
+            {
+                'Name': 'tag:Name',
+                'Values': [prefix+"*"]
+            },
+        ]
+    )
+
+    p = prefix+"-(\d+)"
+    for instance in instances:
+        n = find_name_tag(instance)
+        m = re.match(p, n)
+        if m is not None:
+            ret.append({
+                'id': instance.id,
+                'name': n,
+                'state': instance.state['Name']
+            })
+            #ret.append(instance)
+        ret.sort(cmp=name_cmp, key=lambda l:l['name'])
     return ret

@@ -56,6 +56,14 @@
                                     <button class="btn btn-primary" type="button" onclick="beginUpdateResources()">UPDATE</button>
                                 </div>
                             </li>
+                            <li class="sidebar-search">
+                                <div class="input-group">
+                                    <label style="display:block;">EXPERIMENTAL</label>
+                                    <button class="btn btn-default" type="button" id="btnF1">F1</button>
+                                    <button class="btn btn-default" type="button" id="btnF2">F2</button>
+                                    <button class="btn btn-default" type="button" id="btnF3">F3</button>
+                                </div>
+                            </li>
                         </ul>
                     </div>
                 </div>
@@ -234,7 +242,53 @@
                             <!-- /TAB PANE 2 -->
 
                             <!-- TAB PANE 3: INSTANCES -->
-                            <div class="tab-pane fade" id="instances">TO BE DONE ...</div>
+                            <div class="tab-pane fade" id="instances">
+                                <div class="panel panel-default">
+                                    <div id="divHeadingInstancesList" class="panel-heading">
+                                        <button title="Refresh" class="btn btn-primary btn-circle" onclick="listInstancesForEC2LaunchOptionSet(window.EC2LaunchOptionSetId)"><i class="fa fa-refresh"></i></button>
+                                        <span id="spanOnlineInstances">(Click "Refresh" to load instances)</span>
+                                    </div>
+                                    <div class="panel-body">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Id</th>
+                                                    <th>Name</th>
+                                                    <th>State</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="tbodyOnlineInstances">
+                                                <!--<tr>
+                                                    <td>i-aaaaaaaa</td>
+                                                    <td>prd-abc-1.2.3-aps1-a-1</td>
+                                                    <td>running</td>
+                                                    <td>
+                                                        <button class="btn btn-primary" title="Start"><i class="fa fa-play"></i></button>
+                                                        <button class="btn btn-primary" title="Stop"><i class="fa fa-stop"></i></button>
+                                                        <button class="btn btn-primary" title="Terminate"><i class="fa fa-trash-o"></i></button>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>i-bbbbbbbb</td>
+                                                    <td>prd-abc-1.2.3-aps1-a-2</td>
+                                                    <td>stopped</td>
+                                                    <td>
+                                                        <button class="btn btn-primary" title="Start"><i class="fa fa-play"></i></button>
+                                                        <button class="btn btn-primary" title="Stop"><i class="fa fa-stop"></i></button>
+                                                        <button class="btn btn-primary" title="Terminate"><i class="fa fa-trash-o"></i></button>
+                                                    </td>
+                                                </tr>-->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="panel-footer">
+                                        <button data-dismiss="modal" class="btn btn-default" type="button">Close</button>
+                                        <button class="btn btn-danger" type="button" onclick="stopAllInstances()">Stop All</button>
+                                        <button class="btn btn-success" type="button" onclick="runInstances(window.EC2LaunchOptionSetId)">Run</button>
+                                    </div>
+                                </div>
+                            </div>
                             <!-- /TAB PANE 3 -->
 
                         </div>
@@ -320,6 +374,8 @@ $(document).ready(function() {
     // editor.setReadOnly(true);
     editorNew.getSession().setMode("ace/mode/json");
     editorNew.$blockScrolling = Infinity;
+
+
 })
 </script>
     </body>

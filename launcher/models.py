@@ -69,7 +69,6 @@ class AWSResource(models.Model):
             name__contains=module_name
         )
         for r in resources:
-            print(r.name)
             m = re.match(pattern, r.name)
             if m is not None:
                 #version = m.groups()[1]
