@@ -195,6 +195,17 @@ def ajax_updateEC2LaunchOptionSet(request):
         return JSONResponse(ex.message)
 
 
+def ajax_deleteEC2LaunchOptionSet(request):
+    """Delete an EC2LaunchOptionSet."""
+    optionset = get_object_or_404(EC2LaunchOptionSet, pk=request.POST.get('set_id'))
+    try:
+        optionset.delete()
+    except Exception as ex:
+        return JSONResponse(False)
+    return JSONResponse(True)
+
+
+    
 def ajax_runInstances(request):
     optionset = get_object_or_404(EC2LaunchOptionSet, pk=request.POST.get('set_id'))
     count = int(request.POST.get('count'))

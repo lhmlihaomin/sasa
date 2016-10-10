@@ -200,6 +200,7 @@ Action <span class="caret"></span>\
         <li><a class="actionLink" onclick="viewEC2LaunchOptionSet('+data[i].id+')"><i class="fa fa-edit"></i> View & Edit</a></li>\
         <li><a class="actionLink" onclick="listImagesForModule('+data[i].id+')"><i class="fa fa-arrow-up"></i> Update Version</a></li>\
         <li><a class="actionLink" onclick="listInstancesForEC2LaunchOptionSet('+data[i].id+')"><i class="fa fa-list"></i> Manage Instances</a></li>\
+        <li><a class="actionLink" onclick="deleteEC2LaunchOptionSet('+data[i].id+')"><i class="fa fa-trash-o"></i> Delete</a></li>\
     </ul>\
 </div></td>');
 
@@ -334,6 +335,26 @@ function newEC2LaunchOptionSet() {
             } else {
                 showErrorMessage("Failed to create EC2LaunchOptionSet. Please check your input.");
             }
+        }
+    })
+}
+
+
+function deleteEC2LaunchOptionSet(setId) {
+    if (!confirm("Are you sure to [DELETE] this object?")) {
+        return false;
+    }
+
+    $.ajax({
+        url: './delete_ec2launchoptionset/',
+        method: 'post',
+        dataType: 'json',
+        data: {
+            set_id: setId
+        },
+        success: function() {
+            showResultMessage("Object deleted.");
+            listEC2LaunchOptionSets();
         }
     })
 }
