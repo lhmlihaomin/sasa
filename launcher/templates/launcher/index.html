@@ -3,7 +3,7 @@
 <html>
     <head>
         <meta http-equiv="content-type" content="text/html; Charset=UTF-8" />
-        <title>EC2 DEPLOYMENT</title>
+        <title>EC2 LAUNCHER</title>
         <link rel="stylesheet" type="text/css" href="{% static 'launcher/css/bootstrap.min.css' %}"/>
         <link rel="stylesheet" type="text/css" href="{% static 'launcher/css/common.css' %}"/>
         <link rel="stylesheet" type="text/css" href="{% static 'launcher/css/metisMenu.min.css' %}"/>
@@ -18,7 +18,7 @@
             <!-- NAVIGATION -->
             <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0px;">
                 <div class="navbar-header">
-                    <a class="navbar-brand" href="{% url 'launcher:index' %}">PRD LAUNCHER</a>
+                    <a class="navbar-brand" href="{% url 'launcher:index' %}">EC2 LAUNCHER</a>
                 </div>
                 <div class="navbar-default sidebar" role="navigation">
                     <div class="sidebar-nav navbar-collapse">
@@ -74,7 +74,9 @@
                 <div class="row" style="padding-top:20px;">
 
                     <!-- COL0: MARGIN LEFT -->
-                    <div class="col-lg-1"></div>
+                    <div class="col-lg-1">
+                        <button class="btn btn-default" onclick="toggleEC2launchOptionSetListPanelBodies()">Toggle All</button>
+                    </div>
                     <!-- COL1: OPTION SET LIST -->
                     <div class="col-lg-10" id="divEC2LaunchOptionSetList"></div>
                     <!-- COL2: MARGIN RIGHT -->

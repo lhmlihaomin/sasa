@@ -143,7 +143,11 @@ function listEC2LaunchOptionSets() {
         if ($('#panelBody_'+module).length) {
             return $('#panelBody_'+module);
         } else {
-            var panelHeading = $('<div></div>').addClass("panel-heading").html(module);
+            //var panelHeading = $('<div></div>').addClass("panel-heading").html(module);
+            var panelTitle = $('<a class="panelToggle" href="#" >'+module+'</a>')
+                .click(function(){
+                    togglePanelBody(this)})
+            var panelHeading = $('<div></div>').addClass("panel-heading").append(panelTitle);
             var panelBody = $('<div></div>').addClass("panel-body").prop("id", "panelBody_"+module);
             var moduleTable = $('<table></table>')
                 .addClass("table table-hover")
@@ -645,4 +649,16 @@ function stopAllInstances() {
             refreshOnlineInstances(window.EC2LaunchOptionSetId);
         }
     })
+}
+
+
+function togglePanelBody(a) {
+    // a.parent: panel-heading;
+    // a.parent.next: panel-body;
+    $(a).parent().next().toggle();
+}
+
+
+function toggleEC2launchOptionSetListPanelBodies() {
+    $('#divEC2LaunchOptionSetList .panel-body').toggle();
 }

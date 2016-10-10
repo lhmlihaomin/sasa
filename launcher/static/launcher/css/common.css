@@ -1,3 +1,21 @@
 .actionLink {
     cursor: pointer;
 }
+
+.panelToggle {
+    color: white;
+    cursor: pointer;
+    text-decoration: none;
+}
+.panelToggle:hover {
+    color: lightgray;
+    text-decoration: none;
+}
+.panelToggle:visited {
+    color: white;
+    text-decoration: none;
+}
+.panelToggle:active {
+    color: white;
+    text-decoration: none;
+}
