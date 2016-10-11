@@ -1,5 +1,6 @@
 import collections
 import json
+import logging
 
 from django.shortcuts import render
 from django.http import HttpResponse
@@ -11,6 +12,8 @@ from .awsresource import AWSResourceHandler
 from .ec2 import run_instances, find_name_tag, add_instance_tags, \
 add_volume_tags, get_instances_for_ec2launchoptionset
 
+# logger:
+logger = logging.getLogger('django')
 
 def JSONResponse(obj):
     return HttpResponse(json.dumps(obj), content_type="application/json")
@@ -40,8 +43,12 @@ def ajax_clearResources(request):
     profile = get_object_or_404(Profile, pk=request.POST.get('profile_id'))
     region = get_object_or_404(Region, pk=request.POST.get('region_id'))
     awsresources = AWSResource.objects.filter(profile=profile, region=region).order_by("-resource_type")
+
+    logger.info("clearResources: %s, %s"%(profile.name, region.name))
+
     for awsresource in awsresources:
         awsresource.delete()
+    logger.info("clearResources: DONE.")
     return JSONResponse(True)
 
 def ajax_updateResource(request):
@@ -50,8 +57,10 @@ def ajax_updateResource(request):
     region = get_object_or_404(Region, pk=request.POST.get('region_id'))
     boto3_session = boto3.Session(profile_name=profile.name, region_name=region.code)
     arh = AWSResourceHandler(profile.account_id, boto3_session)
-
     resource_type = request.POST.get("resource_type")
+
+    logger.info("updateResource: %s, %s, %s"%(profile.name, region.name, resource_type))
+
     try:
         # look for "update_xxx" method in AWSResourceHandler object:
         func = getattr(arh, "update_"+resource_type)
@@ -77,8 +86,10 @@ def ajax_updateResource(request):
                 awsresource.save()
             else:
                 awsresource.save()
+        logger.info("updateResource: DONE.")
         return JSONResponse(True)
     except AttributeError:
+        logger.error("updateResource: no such resource type: %s"%(resource_type))
         return HttpResponse("No such resource type", status=400)
     
 
@@ -109,18 +120,26 @@ def ajax_viewEC2LaunchOptionSet(request):
 
 def ajax_saveEC2LaunchOptionSet(request):
     """Save EC2LaunchOptionSet with the given Id."""
-    # check JSON syntax:
     txt = request.POST.get('content')
+    # load EC2LaunchOptionSet:
+    optionset = get_object_or_404(EC2LaunchOptionSet, pk=request.POST.get("id"))
+    
+    logger.info("saveEC2LaunchOptionSet: %s, %s, %s"%(
+        optionset.profile.name,
+        optionset.region.name,
+        optionset.name))
+
+    # check JSON syntax:
     try:
         jsonobj = json.loads(txt)
         txt = json.dumps(jsonobj, indent=2)
-    except:
+    except Exception as ex:
+        logger.error("saveEC2LaunchOptionSet: %s"%(ex.message))
         return HttpResponse("Content is not valid JSON.", status=400)
-    # load EC2LaunchOptionSet:
-    optionset = get_object_or_404(EC2LaunchOptionSet, pk=request.POST.get("id"))
     # save EC2LaunchOptionSet:
     optionset.content = txt
     optionset.save()
+    logger.info("saveEC2LaunchOptionset: DONE.")
     return JSONResponse(True)
 
 
@@ -131,6 +150,15 @@ def ajax_newEC2LaunchOptionSet(request):
     module = request.POST.get('module')
     version = request.POST.get('version')
     az = request.POST.get('az')
+
+    logger.info("newEC2LaunchOptionSet: %s, %s, %s-%s-%s"%(
+        profile.name,
+        region.name,
+        module,
+        version,
+        az
+    ))
+
     if len(module) * len(version) * len(az) == 0:
         return JSONResponse(False)
     # check JSON syntax:
@@ -138,7 +166,8 @@ def ajax_newEC2LaunchOptionSet(request):
     try:
         jsonobj = json.loads(txt)
         txt = json.dumps(jsonobj, indent=2)
-    except:
+    except Exception as ex:
+        logger.error("newEC2LaunchOptionset: %s"%(ex.message))
         return JSONResponse(False)
     # create the option set:
     try:
@@ -152,8 +181,10 @@ def ajax_newEC2LaunchOptionSet(request):
             enabled = True
         )
         optionset.save()
-    except:
+    except Exception as ex:
+        logger.error("newEC2LaunchOptionset: %s"%(ex.message))
         return JSONResponse(False)
+    logger.info("newEC2LaunchOptionset: DONE.")
     return JSONResponse(True)
 
 
@@ -176,7 +207,16 @@ def ajax_updateEC2LaunchOptionSet(request):
     # data validation:
     profile = optionset.profile
     region = optionset.region
+
+    logger.info("updateEC2LaunchOptionSet: %s, %s, %s, %s"%(
+        profile.name,
+        region.name,
+        optionset.name,
+        new_image
+    ))
+
     if profile != new_image.profile or region != new_image.region:
+        logger.error("updateEC2LaunchOptionSet: profile/region doesn't match.")
         return HttpResponse("false", status=400)
     try:
         # get and update new version:
@@ -190,18 +230,23 @@ def ajax_updateEC2LaunchOptionSet(request):
         # remove pk and save as a new one:
         optionset.pk = None
         optionset.save()
+        logger.info("updateEC2LaunchOptionSet: DONE.")
         return JSONResponse(True)
     except Exception as ex:
+        logger.error("updateEC2LaunchOptionSet: %s"%(ex.message,))
         return JSONResponse(ex.message)
 
 
 def ajax_deleteEC2LaunchOptionSet(request):
     """Delete an EC2LaunchOptionSet."""
     optionset = get_object_or_404(EC2LaunchOptionSet, pk=request.POST.get('set_id'))
+    logger.info("deleteEC2LaunchOptionSet: %s"%(optionset.name))
     try:
         optionset.delete()
     except Exception as ex:
+        logger.error("deleteEC2LaunchOptionSet: %s"%(ex.message))
         return JSONResponse(False)
+    logger.info("deleteEC2LaunchOptionSet: DONE.")
     return JSONResponse(True)
 
 
@@ -214,7 +259,21 @@ def ajax_runInstances(request):
         region_name=optionset.region.code
     )
     ec2resource = session.resource("ec2")
-    instance_ids = run_instances(ec2resource, optionset, count)
+
+    logger.info("runInstances: %s, %s, %s, %s"%(
+        optionset.profile.name,
+        optionset.region.name,
+        optionset.name,
+        count
+    ))
+
+    try:
+        instance_ids = run_instances(ec2resource, optionset, count)
+    except Exception as ex:
+        logger.error("runInstances: %s"%(ex.message))
+        return HttpResponse(ex.message, status=500)
+
+    logger.info("runInstances: DONE. %s"%(instance_ids))
     return JSONResponse(instance_ids)
 
 
@@ -226,7 +285,16 @@ def ajax_addInstanceTags(request):
         region_name=optionset.region.code
     )
     ec2resource = session.resource("ec2")
-    result = add_instance_tags(ec2resource, optionset, instance_ids)
+
+    logger.info("addInstanceTags: %s, %s"%(optionset.name, instance_ids))
+
+    try:
+        result = add_instance_tags(ec2resource, optionset, instance_ids)
+    except Exception as ex:
+        logger.error("addInstanceTags: %s"%(ex.message))
+        return HttpResponse(ex.message, status=500)
+
+    logger.info("addInstanceTags: DONE.")
     return JSONResponse(result)
 
 
@@ -238,7 +306,16 @@ def ajax_addVolumeTags(request):
         region_name=optionset.region.code
     )
     ec2resource = session.resource("ec2")
-    result = add_volume_tags(ec2resource, instance_ids)
+
+    logger.info("addVolumeTags: %s, %s"%(optionset.name, instance_ids))
+
+    try:
+        result = add_volume_tags(ec2resource, instance_ids)
+    except Exception as ex:
+        logger.error("addVolumeTags: %s"%(ex.message))
+        return HttpResponse(ex.message, status=500)
+
+    logger.info("addVolumeTags: DONE.")
     return JSONResponse(result)
 
 
@@ -263,15 +340,22 @@ def ajax_startInstance(request):
     instance_id = request.POST.get("instance_id")
     ec2resource = session.resource("ec2")
     instance = ec2resource.Instance(instance_id)
+
+    logger.info("startInstance: %s"%(instance_id))
+
     try:
         #resp = instance.start(DryRun=True)
         resp = instance.start()
     except Exception as ex:
+        logger.error("startInstance: %s"%(ex.message))
         return JSONResponse(ex.message)
+
     msg = "Instance state: %s --> %s."%(
         resp['StartingInstances'][0]['PreviousState']['Name'],
         resp['StartingInstances'][0]['CurrentState']['Name'],
     )
+
+    logger.info("startInstance: DONE.")
     return JSONResponse(msg)
 
 
@@ -285,15 +369,22 @@ def ajax_stopInstance(request):
     instance_id = request.POST.get("instance_id")
     ec2resource = session.resource("ec2")
     instance = ec2resource.Instance(instance_id)
+
+    logger.info("stopInstance: %s"%(instance_id))
+
     try:
         #instance.stop(DryRun=True)
         resp = instance.stop()
     except Exception as ex:
+        logger.error("stopInstance: %s"%(ex.message))
         return JSONResponse(ex.message)
+
     msg = "Instance state: %s --> %s."%(
         resp['StoppingInstances'][0]['PreviousState']['Name'],
         resp['StoppingInstances'][0]['CurrentState']['Name'],
     )
+
+    logger.info("stopInstance: DONE.")
     return JSONResponse(msg)
     
 
@@ -308,15 +399,22 @@ def ajax_terminateInstance(request):
     instance_id = request.POST.get("instance_id")
     ec2resource = session.resource("ec2")
     instance = ec2resource.Instance(instance_id)
+
+    logger.info("terminateInstance: %s"%(instance_id))
+
     try:
         #instance.terminate(DryRun=True)
         resp = instance.terminate()
     except Exception as ex:
+        logger.error("terminateInstance: %s"%(ex.message))
         return JSONResponse(ex.message)
+
     msg = "Instance state: %s --> %s."%(
         resp['TerminatingInstances'][0]['PreviousState']['Name'],
         resp['TerminatingInstances'][0]['CurrentState']['Name'],
     )
+
+    logger.info("terminateInstance: DONE.")
     return JSONResponse(msg)
 
 
@@ -332,14 +430,21 @@ def ajax_stopAllInstances(request):
     for instance in instances:
         if instance['state'] not in ['terminated', 'shutting-down']:
             instance_ids.append(instance['id'])
+
+    logger.info("stopAllInstances: %s"%(instance_ids))
+
     try:
         ec2client = session.client("ec2")
         resp = ec2client.stop_instances(InstanceIds=instance_ids)
     except Exception as ex:
+        logger.error("stopAllInstances: %s"%(ex.message))
         return JSONResponse(ex.message)
+
     msg = "Instance states: \n "
     for stopping_instance in resp['StoppingInstances']:
         msg += "%s: %s -> %s \n "%(stopping_instance['InstanceId'],
                                    stopping_instance['PreviousState']['Name'],
                                    stopping_instance['CurrentState']['Name'])
+
+    logger.info("stopAllInstances: DONE.")
     return JSONResponse(msg)
