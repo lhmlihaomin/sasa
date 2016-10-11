@@ -95,8 +95,8 @@ def ajax_updateResource(request):
 
 def ajax_listResources(request):
     """Get all AWSResource objects for a given profile & region."""
-    profile = get_object_or_404(Profile, pk=request.POST.get('profile_id'))
-    region = get_object_or_404(Region, pk=request.POST.get('region_id'))
+    profile = get_object_or_404(Profile, pk=request.GET.get('profile_id'))
+    region = get_object_or_404(Region, pk=request.GET.get('region_id'))
     awsresources = AWSResource.objects.filter(profile=profile, region=region).order_by("-resource_type")
     seq = map(AWSResource.to_dict, awsresources)
     return JSONResponse(seq)
@@ -104,8 +104,8 @@ def ajax_listResources(request):
 
 def ajax_listEC2LaunchOptionSets(request):
     """Get all EC2LaunchOptionSet objects for a given profile & region."""
-    profile = get_object_or_404(Profile, pk=request.POST.get('profile_id'))
-    region = get_object_or_404(Region, pk=request.POST.get('region_id'))
+    profile = get_object_or_404(Profile, pk=request.GET.get('profile_id'))
+    region = get_object_or_404(Region, pk=request.GET.get('region_id'))
     optionsets = EC2LaunchOptionSet.objects\
         .filter(profile=profile, region=region, enabled=True)\
         .order_by('module', 'version')
@@ -114,7 +114,7 @@ def ajax_listEC2LaunchOptionSets(request):
 
 def ajax_viewEC2LaunchOptionSet(request):
     """Get the detailed information on a given EC2LaunchOptionSet."""
-    optionset = get_object_or_404(EC2LaunchOptionSet, pk=request.POST.get("id"))
+    optionset = get_object_or_404(EC2LaunchOptionSet, pk=request.GET.get("id"))
     return HttpResponse(json.dumps(EC2LaunchOptionSet.to_dict(optionset), indent=2))
 
 
@@ -190,9 +190,9 @@ def ajax_newEC2LaunchOptionSet(request):
 
 def ajax_listAllImagesForModule(request):
     """List all images for a module."""
-    profile = get_object_or_404(Profile, pk=request.POST.get('profile_id'))
-    region = get_object_or_404(Region, pk=request.POST.get('region_id'))
-    optionset = get_object_or_404(EC2LaunchOptionSet, pk=request.POST.get('id'))
+    profile = get_object_or_404(Profile, pk=request.GET.get('profile_id'))
+    region = get_object_or_404(Region, pk=request.GET.get('region_id'))
+    optionset = get_object_or_404(EC2LaunchOptionSet, pk=request.GET.get('id'))
 
     module = optionset.module
     images = AWSResource.filter_image_by_module(profile, region, module)

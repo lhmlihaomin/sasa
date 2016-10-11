@@ -127,7 +127,7 @@ function listResources() {
     }
     $.ajax({
         url: "./list_resources/",
-        method: "post",
+        method: "get",
         data: {
             profile_id: profileId,
             region_id: regionId
@@ -224,7 +224,7 @@ Action <span class="caret"></span>\
     $('#divEC2LaunchOptionSetList').empty();
     $.ajax({
         url: "./list_ec2launchoptionsets/",
-        method: "post",
+        method: "get",
         data: {
             profile_id: profileId,
             region_id: regionId
@@ -254,7 +254,7 @@ function viewEC2LaunchOptionSet(setId) {
     }
     $.ajax({
         url: "./view_ec2launchoptionset/",
-        method: "post",
+        method: "get",
         data: {
             id: setId
         },
@@ -389,7 +389,7 @@ function listImagesForModule(setId) {
     }
     $.ajax({
         url:"list_all_images_for_module/",
-        method: "post",
+        method: "get",
         data:{
             profile_id: profileId,
             region_id: regionId,

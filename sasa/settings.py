@@ -121,7 +121,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-LOGGING = {
+"""LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters':{
@@ -144,4 +144,4 @@ LOGGING = {
             'propagate': True,
         },
     },
-}
+}"""
