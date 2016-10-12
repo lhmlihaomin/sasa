@@ -68,6 +68,21 @@ class CForm(models.Model):
 
     def __str__(self):
         return self.name
+
+    def save_data(self, data):
+        if self.id is None:
+            print("CForm not saved, cannot exec 'save_data' now.")
+            self.save()
+        for key in data:
+            try:
+                cffv = CFormFieldValue()
+                cffv.form = self
+                cffv.field = self.form_type.fields.get(pk=key)
+                cffv.value = data[key]
+                cffv.save()
+            except Exception as ex:
+                print(ex.message)
+                break
     
 
 class CFormFieldValue(models.Model):

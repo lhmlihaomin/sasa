@@ -58,21 +58,19 @@ class CBaseForm(forms.Form):
         else:
             # return a generic text input:
             f = forms.CharField()
-        print(f.label_suffix)
         return f
 
 
     def set_fields(self, ordered_fields):
         for f in ordered_fields:
-            self.fields.update({f.title: self.map_field(f)})
+            self.fields.update({str(f.id): self.map_field(f)})
 
 
     def set_data(self, post_data):
         # find each field and set its data:
         for key in post_data:
-            print(key)
             if self.fields.has_key(key):
                 self.data[key] = post_data[key]
         
-        # don't forget to set this, or this form is never valid:
+        # don't forget to set bound, or this form will never be valid:
         self.is_bound = True
