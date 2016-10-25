@@ -34,7 +34,7 @@ def index(request):
 def ajax_getRegionsForProfile(request, profile_id):
     """Get all available regions for a given profile."""
     regions = get_object_or_404(Profile, pk=profile_id).region_set.all()
-    regions = map(Region.to_dict, regions)
+    regions = list(map(Region.to_dict, regions))
     return JSONResponse(regions)
 
 
@@ -98,7 +98,7 @@ def ajax_listResources(request):
     profile = get_object_or_404(Profile, pk=request.GET.get('profile_id'))
     region = get_object_or_404(Region, pk=request.GET.get('region_id'))
     awsresources = AWSResource.objects.filter(profile=profile, region=region).order_by("-resource_type")
-    seq = map(AWSResource.to_dict, awsresources)
+    seq = list(map(AWSResource.to_dict, awsresources))
     return JSONResponse(seq)
 
 
@@ -109,7 +109,7 @@ def ajax_listEC2LaunchOptionSets(request):
     optionsets = EC2LaunchOptionSet.objects\
         .filter(profile=profile, region=region, enabled=True)\
         .order_by('module', 'version')
-    seq = map(EC2LaunchOptionSet.to_dict, optionsets)
+    seq = list(map(EC2LaunchOptionSet.to_dict, optionsets))
     return JSONResponse(seq)
 
 def ajax_viewEC2LaunchOptionSet(request):
@@ -196,7 +196,7 @@ def ajax_listAllImagesForModule(request):
 
     module = optionset.module
     images = AWSResource.filter_image_by_module(profile, region, module)
-    images = map(AWSResource.to_dict, images)
+    images = list(map(AWSResource.to_dict, images))
     return JSONResponse(images)
 
 
@@ -448,3 +448,41 @@ def ajax_stopAllInstances(request):
 
     logger.info("stopAllInstances: DONE.")
     return JSONResponse(msg)
+
+
+def remove_names(request):
+    out = ""
+    for optionset in EC2LaunchOptionSet.objects.all():
+        print(optionset.id)
+        obj = json.loads(optionset.content)
+        out += str(optionset.id)+": \n<br/>"
+        try:
+            obj.pop('name')
+            out += "Key 'Name' removed.\n<br/>"
+        except:
+            pass
+        try:
+            obj['tags'].pop('Name')
+            out += "Tag key 'Name' removed.\n<br/>"
+        except:
+            pass
+        optionset.content = json.dumps(obj, indent=2)
+        optionset.save()
+        out += "\n</br>"
+    return HttpResponse(out)
+
+
+def f1(request):
+    def get_list_of(attr, seq):
+        return list(map(lambda x:x[attr], seq))
+
+    PROFILE_NAME = "cn-prd"
+    REGION_NAME = "cn-north-1"
+
+    session = boto3.Session(profile_name=PROFILE_NAME, region_name=REGION_NAME)
+    client = session.client("elb")
+    ec2resource = session.resource("ec2")
+
+    optionset = EC2LaunchOptionSet.objects.get(pk=100)
+    instances = get_instances_for_ec2launchoptionset(ec2resource, optionset)
+    return JSONResponse(instances)

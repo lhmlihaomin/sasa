@@ -24,4 +24,6 @@ urlpatterns = [
     url("^stop_instance/", views.ajax_stopInstance, name="ajax_stopInstance"),
     url("^terminate_instance/", views.ajax_terminateInstance, name="ajax_terminateInstance"),
     url("^stop_all_instances/", views.ajax_stopAllInstances, name="ajax_stopAllInstances"),
+    url("^remove_names/", views.remove_names, name="remove_names"),
+    url("^f1/", views.f1, name="f1"),
 ]

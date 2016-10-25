@@ -16,7 +16,7 @@
         <div id="wrapper">
 
             <!-- NAVIGATION -->
-            <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0px;">
+            <nav class="navbar navbar-default navbar-fixed-top" role="navigation" style="margin-bottom: 0px;">
                 <div class="navbar-header">
                     <a class="navbar-brand" href="{% url 'launcher:index' %}">EC2 LAUNCHER</a>
                 </div>
@@ -70,7 +70,11 @@
             </nav>
             <!-- /NAVIGATION -->
 
-            <div id="page-wrapper" style="min-height: 726px;">
+            <div id="page-wrapper">
+                <!-- PLACEHOLDER BEHIND FIXED NAVBAR -->
+                <div class="row" style="height: 50px;"></div>
+                <!-- /PLACEHOLDER -->
+
                 <div class="row" style="padding-top:20px;">
 
                     <!-- COL0: MARGIN LEFT -->
@@ -260,28 +264,7 @@
                                                     <th>Action</th>
                                                 </tr>
                                             </thead>
-                                            <tbody id="tbodyOnlineInstances">
-                                                <!--<tr>
-                                                    <td>i-aaaaaaaa</td>
-                                                    <td>prd-abc-1.2.3-aps1-a-1</td>
-                                                    <td>running</td>
-                                                    <td>
-                                                        <button class="btn btn-primary" title="Start"><i class="fa fa-play"></i></button>
-                                                        <button class="btn btn-primary" title="Stop"><i class="fa fa-stop"></i></button>
-                                                        <button class="btn btn-primary" title="Terminate"><i class="fa fa-trash-o"></i></button>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td>i-bbbbbbbb</td>
-                                                    <td>prd-abc-1.2.3-aps1-a-2</td>
-                                                    <td>stopped</td>
-                                                    <td>
-                                                        <button class="btn btn-primary" title="Start"><i class="fa fa-play"></i></button>
-                                                        <button class="btn btn-primary" title="Stop"><i class="fa fa-stop"></i></button>
-                                                        <button class="btn btn-primary" title="Terminate"><i class="fa fa-trash-o"></i></button>
-                                                    </td>
-                                                </tr>-->
-                                            </tbody>
+                                            <tbody id="tbodyOnlineInstances"></tbody>
                                         </table>
                                     </div>
                                     <div class="panel-footer">

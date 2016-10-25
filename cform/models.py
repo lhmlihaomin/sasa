@@ -29,7 +29,7 @@ class CField(models.Model):
 
     @property
     def choices(self):
-        choices = map(lambda x: (x, x), self.options.split("|"))
+        choices = list(map(lambda x: (x, x), self.options.split("|")))
         return choices
 
 
@@ -44,7 +44,7 @@ class CFormType(models.Model):
 
     @property
     def cfield_order(self):
-        return map(unicode.strip, self.field_order.split(", "))
+        return list(map(unicode.strip, self.field_order.split(", ")))
 
     @property
     def cfield_dict(self):

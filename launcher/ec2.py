@@ -106,6 +106,7 @@ def add_instance_tags(ec2res, optionset, instance_ids):
 
 
 def add_volume_tags(ec2res, instance_ids):
+    """Add volume tags with instance information"""
     ret = {}
     # for each instance
     for instance_id in instance_ids:
@@ -121,8 +122,12 @@ def add_volume_tags(ec2res, instance_ids):
                 'Value': find_name_tag(instance)
             }]
             # add tags to volume:
+            #flag = True
             for volume in instance.volumes.all():
                 volume.create_tags(Tags=boto3tags)
+                #flag = False
+            #if flag:
+                # retry...
             ret.update({instance.id: True})
         except Exception as ex:
             ret.update({instance.id: False})
