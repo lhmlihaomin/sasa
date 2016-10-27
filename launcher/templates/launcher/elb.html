@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+    <head>
+        <meta http-equiv="content-type" content="text/html; Charset=UTF-8" />
+        <title>EC2 LAUNCHER</title>
+        <link rel="stylesheet" type="text/css" href="{% static 'launcher/css/bootstrap.min.css' %}"/>
+        <link rel="stylesheet" type="text/css" href="{% static 'launcher/css/common.css' %}"/>
+        <link rel="stylesheet" type="text/css" href="{% static 'launcher/css/metisMenu.min.css' %}"/>
+        <link rel="stylesheet" type="text/css" href="{% static 'launcher/css/font-awesome.min.css' %}"/>
+        <link rel="stylesheet" type="text/css" href="{% static 'launcher/css/sb-admin-2.css' %}"/>
+        <link rel="stylesheet" type="text/css" href="{% static 'launcher/css/messenger.css' %}"/>
+        <link rel="stylesheet" type="text/css" href="{% static 'launcher/css/messenger-theme-flat.css' %}"/>
+    </head>
+    <body>
+        <div id="wrapper">
+
+            <!-- NAVIGATION -->
+            <nav class="navbar navbar-default navbar-fixed-top" role="navigation" style="margin-bottom: 0px;">
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="{% url 'launcher:index' %}">EC2 LAUNCHER</a>
+                </div>
+                <div class="navbar-default sidebar" role="navigation">
+                    <div class="sidebar-nav navbar-collapse">
+                        <ul class="nav" id="side-menu">
+                            <li class="sidebar-search">
+                                <div class="input-group">
+                                    <label>PROFILE</label>
+                                    <select id="selProfile" class="form-control" onchange="getRegionsForProfile()" autocomplete="off">
+                                        <option value="0" selected> --- </option>
+                                        {% for profile in profiles %}
+                                        <option value="{{profile.id}}">{{profile.name}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </li>
+                            <li class="sidebar-search">
+                                <div class="input-group">
+                                    <label>REGION</label>
+                                    <select id="selRegions" class="form-control">
+                                        <option value="0"> --- </option>
+                                    </select>
+                                </div>
+                            </li>
+                            <li class="sidebar-search">
+                                <div class="input-group">
+                                    <label style="display:block;">LOAD BALANCERS</label>
+                                    <button class="btn btn-primary" type="button" onclick="">UPDATE</button>
+                                    <button class="btn btn-primary" type="button" onclick="">LIST</button>
+                                </div>
+                            </li>
+                            <li class="sidebar-search">
+                                <div class="input-group">
+                                    <label style="display:block;">EXPERIMENTAL</label>
+                                    <button class="btn btn-default" type="button" id="btnF1">F1</button>
+                                    <button class="btn btn-default" type="button" id="btnF2">F2</button>
+                                    <button class="btn btn-default" type="button" id="btnF3">F3</button>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+            <!-- /NAVIGATION -->
+
+            <div id="page-wrapper">
+                <!-- PLACEHOLDER BEHIND FIXED NAVBAR -->
+                <div class="row" style="height: 50px;"></div>
+                <!-- /PLACEHOLDER -->
+
+                <div class="row" style="padding-top:20px;">
+
+                    <!-- COL0: MODULE INSTANCES -->
+                    <div class="col-lg-6" id="divModuleInstances" style="background-color:#dddddd">
+                        <div>
+                            <label for="selModule">MODULE:</label>
+                            <select id="selModule" style="margin-right:10px;">
+                                <option>appservice_pushservice</option>
+                                <option>connector</option>
+                            </select>
+                            <label for="selVersion">VERSION:</label>
+                            <select id="selVersion">
+                                <option>1.0.11_2.1.15</option>
+                                <option>2.0.0</option>
+                            </select>
+                            <button>LIST INSTANCES</button>
+                        </div>
+                    </div>
+                    <!-- COL1: ELB INSTANCES -->
+                    <div class="col-lg-6" id="divELBInstances" style="background-color:#eeeeee">
+                        <label for="selELBs">ELBs:</label>
+                        <select id="selELBs">
+                            <option>prod-elb-connector</option>
+                            <option>prod-elb-app-server</option>
+                            <option>prod-elb-app-connector</option>
+                            <option>prod-elb-mail-internal</option>
+                            <option>prd-elb-openfalcon</option>
+                            <option>prd-sohoipc-elb-ipcservice</option>
+                            <option>prd-elb-appserverinternal</option>
+                            <option>prd-sohoipc-elb-relay</option>
+                            <option>prd-elb-ipcConnector-0</option>
+                        </select>
+                        <button>LIST INSTANCES</button>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <!-- RESOURCES LIST MODAL -->
+        <div id="modalResources" class="modal fade" aria-hidden="true" aria-labelledby="modalLabelResources" role="dialog" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content" style="width: auto;">
+                    <div class="modal-header">
+                        <button class="close" aria-hidden="true" data-dismiss="modal" type="button">x</button>
+                        <h4 id="modalLabelResources" class="modal-title">AWS RESOURCES</h4>
+                    </div>
+                    <div id="divAWSResources" class="modal-body">
+                        <table class="table table-striped table-bordered" style="width:100%;font-size:0.9em;">
+                            <thead>
+                                <tr>
+                                    <th>NAME</th>
+                                    <th>ID</th>
+                                    <th>TYPE</th>
+                                    <th>ARN</th>
+                                    <th>PARENT</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyAWSResources">
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="modal-footer">
+                        <button data-dismiss="modal" class="btn btn-default" type="button">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /RESOURCES LIST MODAL -->
+
+
+        <!-- CREATE NEW OPTION SET MODAL -->
+        <div id="modalNew" class="modal fade" aria-hidden="true" aria-labelledby="modalLabelNew" role="dialog" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content" style="width: auto;">
+                    <div class="modal-header">
+                        <button class="close" aria-hidden="true" data-dismiss="modal" type="button">x</button>
+                        <h4 id="modalLabelNew" class="modal-title">New EC2 Launch Option Set</h4>
+                    </div>
+                    <div id="divNew" class="modal-body" style="height: 600px">
+                        <table class="table table-striped">
+                            <tbody>
+                                <tr>
+                                    <th style="width:76px;">MODULE</th>
+                                    <td><input id="iModule" name="module" type="text" class="form-control"/></td>
+                                </tr>
+                                <tr>
+                                    <th>VERSION</th>
+                                    <td><input id="iVersion" name="version" type="text" class="form-control"/></td>
+                                </tr>
+                                <tr>
+                                    <th>AZ</th>
+                                    <td><input id="iAZ" name="az" type="text" class="form-control"/></td>
+                                </tr>
+                                <tr>
+                                    <th>JSON</th>
+                                    <td>
+                                        <div id="divNewEditorContainer">
+                                            <div id="aceEditorNew" style="position:absolute; width:770px; height:400px; font-size:14px;"></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" type="button" onclick="newEC2LaunchOptionSet();">Save</button>
+                        <button data-dismiss="modal" class="btn btn-default" type="button">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /CREATE NEW OPTION SET MODAL --> 
+
+         <!-- UPDATE VERSION MODAL -->
+        <div id="modalUpdateVersion" class="modal fade" aria-hidden="true" aria-labelledby="modalLabelUpdateVersion" role="dialog" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content" style="width: auto;">
+                    <div class="modal-header">
+                        <button class="close" aria-hidden="true" data-dismiss="modal" type="button">x</button>
+                        <h4 id="modalLabelUpdateVersion" class="modal-title">UPDATE MODULE VERSION</h4>
+                    </div>
+                    <div id="divUpdateVersion" class="modal-body">
+                        
+                    </div>
+                    <div class="modal-footer">
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /UPDATE VERSION MODAL --> 
+
+        <!-- DETAIL & OPERATION MODAL -->
+        <div id="modalDetail" class="modal fade" aria-hidden="true" aria-labelledby="modalLabelDetail" role="dialog" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content" style="width: auto;">
+                    <div class="modal-header">
+                        <button class="close" aria-hidden="true" data-dismiss="modal" type="button">x</button>
+                        <h4 id="modalLabelDetail" class="modal-title">DETAIL & OPERATIONS</h4>
+                    </div>
+                    <div id="divDetail" class="modal-body">
+                        
+
+                        <!-- DETAIL & OPERATION TABS -->
+                        <ul class="nav nav-tabs">
+                            <li class="active">
+                                <a href="#json_editor" data-toggle="tab" aria-expanded="true" id="a_detail" onclick="viewEC2LaunchOptionSet(EC2LaunchOptionSetId);">Detail</a>
+                            </li>
+                            <li>
+                                <a href="#ami_versions" data-toggle="tab" aria-expanded="true" id="a_ami_versions" onclick="listImagesForModule(EC2LaunchOptionSetId)">Versions</a>
+                            </li>
+                            <li>
+                                <a href="#instances" data-toggle="tab" aria-expanded="true" id="a_instances">Instances</a>
+                            </li>
+                        </ul>
+                        <div class="tab-content">
+
+                            <!-- TAB PANE 1: DETAIL -->
+                            <div class="tab-pane fade in active" id="json_editor">
+                                <div class="panel panel-default">
+                                    <div id="divEC2LaunchOptionSetTitle" class="panel-heading">EC2 LAUNCH OPTION SET DETAIL</div>
+                                    <div class="panel-body" style="height: 520px;">
+                                        <div id="divAceEditorContainer">
+                                            <div id="aceEditor" style="position:absolute; width:640px; height:480px; font-size:14px;">"Nothing loaded."</div>
+                                        </div>
+                                    </div>
+                                    <div class="panel-footer">
+                                        <button data-dismiss="modal" class="btn btn-default" type="button">Close</button>
+                                        <button type="button" class="btn btn-danger" onclick="editor.setValue('')">Clear</button>
+                                        <button type="button" class="btn btn-primary" onclick="saveEC2LaunchOptionSet()">Save</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- /TAB PANE 1 -->
+
+                            <!-- TAB PANE 2: AMI VERSIONS -->
+                            <div class="tab-pane fade" id="ami_versions">
+                                <div class="panel panel-default">
+                                    <div id="divHeadingUpdateVersion" class="panel-heading">UPDATE VERSION</div>
+                                    <div class="panel-body">
+                                        <div class="input-group">
+                                            <label>SELECT AN IMAGE FOR NEW VERSION: </label>
+                                            <select class="form-control" id="selListImagesForModule"></select>
+                                        </div>
+                                    </div>
+                                    <div class="panel-footer">
+                                        <button data-dismiss="modal" class="btn btn-default" type="button">Close</button>
+                                        <button class="btn btn-primary" type="button" onclick="updateEC2LaunchOptionSet()">Create</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- /TAB PANE 2 -->
+
+                            <!-- TAB PANE 3: INSTANCES -->
+                            <div class="tab-pane fade" id="instances">
+                                <div class="panel panel-default">
+                                    <div id="divHeadingInstancesList" class="panel-heading">
+                                        <button title="Refresh" class="btn btn-primary btn-circle" onclick="listInstancesForEC2LaunchOptionSet(window.EC2LaunchOptionSetId)"><i class="fa fa-refresh"></i></button>
+                                        <span id="spanOnlineInstances">(Click "Refresh" to load instances)</span>
+                                    </div>
+                                    <div class="panel-body">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Id</th>
+                                                    <th>Name</th>
+                                                    <th>State</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="tbodyOnlineInstances"></tbody>
+                                        </table>
+                                    </div>
+                                    <div class="panel-footer">
+                                        <button data-dismiss="modal" class="btn btn-default" type="button">Close</button>
+                                        <button class="btn btn-danger" type="button" onclick="stopAllInstances()">Stop All</button>
+                                        <button class="btn btn-success" type="button" onclick="runInstances(window.EC2LaunchOptionSetId)">Run</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- /TAB PANE 3 -->
+
+                        </div>
+                        <!-- /DETAIL & OPERATION TABS -->
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /DETAIL & OPERATION MODAL -->
+
+
+        <script src="{% static 'launcher/js/jquery-1.12.4.min.js' %}"></script>
+        <script src="{% static 'launcher/js/bootstrap.min.js' %}"></script>
+        <script src="{% static 'launcher/js/metisMenu.min.js' %}"></script>
+        <script src="{% static 'launcher/js/sb-admin-2.js' %}"></script>
+        <script src="{% static 'launcher/js/messenger.min.js' %}"></script>
+        <script src="{% static 'launcher/js/messenger-theme-flat.js' %}"></script>
+        <script src="{% static 'launcher/js/ace.js' %}"></script>
+        <script src="{% static 'launcher/js/launcher.js' %}"></script>
+        <script>
+function handleAjaxError(xhr, status, error) {
+    alert("Ajax request failed: "+status+" \n "+error)
+}
+
+// using jQuery
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+function csrfSafeMethod(method) {
+    // these HTTP methods do not require CSRF protection
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+}
+
+var csrftoken = getCookie('csrftoken');
+$.ajaxSetup({
+    beforeSend: function(xhr, settings) {
+        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+        }
+    },
+    error: handleAjaxError
+});
+
+
+/* global variables */
+var msg = null;                     // the pop-up Messenger object;
+var resourceTypes = [               // list of AWS resource types;
+    "images",
+    "key_pairs",
+    "instance_profiles",
+    "vpcs",
+    "subnets",
+    "security_groups",
+    "server_certificates"
+];
+var updateResourceIndex = -1;       // index of which resource type is being updated;
+var editor;                         // JSON editor (ace) object;
+var editorNew;                      // JSON editor for creating new optionset;
+var EC2LaunchOptionSetId = 0;       // Id of the EC2LaunchOptionSet currently being edited/updated.
+$(document).ready(function() {
+    Messenger.options = {
+        extraClasses: 'messenger-fixed messenger-on-top',
+        theme: 'flat'
+    };
+
+    editor = ace.edit("aceEditor");
+    editor.setTheme("ace/theme/eclipse");
+    // editor.setReadOnly(true);
+    editor.getSession().setMode("ace/mode/json");
+    editor.$blockScrolling = Infinity;
+
+    editorNew = ace.edit("aceEditorNew");
+    editorNew.setTheme("ace/theme/eclipse");
+    // editor.setReadOnly(true);
+    editorNew.getSession().setMode("ace/mode/json");
+    editorNew.$blockScrolling = Infinity;
+
+
+})
+</script>
+    </body>
+</html>

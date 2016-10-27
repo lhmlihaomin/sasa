@@ -35,7 +35,7 @@ function getRegionsForProfile() {
     }
     showStartMessage("Loading Regions...");
     $.ajax({
-        url: "get_regions_for_profile/"+profileId+"/",
+        url: "/launcher/get_regions_for_profile/"+profileId+"/",
         dataType: "json",
         success: listRegions
     })

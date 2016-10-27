@@ -152,3 +152,15 @@ class EC2LaunchOptionSet(models.Model):
             'ami_version_match': obj.ami_version_match(),
             'content': obj.content
         }
+
+
+class ELB(models.Model):
+    name = models.CharField(max_length=1000)
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE, default=None, null=True)
+    region = models.ForeignKey(Region, on_delete=models.CASCADE, default=None, null=True)
+
+    def __str__(self):
+        return self.name
+
+    def __unicode__(self):
+        return unicode(self.__str__())

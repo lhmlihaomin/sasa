@@ -26,4 +26,11 @@ urlpatterns = [
     url("^stop_all_instances/", views.ajax_stopAllInstances, name="ajax_stopAllInstances"),
     url("^remove_names/", views.remove_names, name="remove_names"),
     url("^f1/", views.f1, name="f1"),
+
+    url("^elb/$", views.elb, name="elb"),
+    url("^elb/update_elbs/$", views.update_elbs, name="update_elbs"),
+    url("^elb/get_distinct_module_names/$", views.ajax_getDistinctModuleNames, name="get_distinct_module_names"),
+    url("^elb/get_module_versions/$", views.ajax_getModuleVersions, name="get_module_versions"),
+    url("^elb/get_elb_instances/$", views.ajax_getELBInstances, name="get_elb_instances"),
+    
 ]

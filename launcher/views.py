@@ -7,7 +7,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 import boto3
 
-from .models import Profile, Region, AWSResource, EC2LaunchOptionSet
+from .models import Profile, Region, AWSResource, EC2LaunchOptionSet, ELB
 from .awsresource import AWSResourceHandler
 from .ec2 import run_instances, find_name_tag, add_instance_tags, \
 add_volume_tags, get_instances_for_ec2launchoptionset
@@ -31,6 +31,19 @@ def index(request):
     return render(request, "launcher/index.html", ctx)
 
 
+def elb(request):
+    profiles = Profile.objects.all()
+    regions = Region.objects.all()
+
+    ctx = {
+        'profiles': profiles,
+        'regions': regions,
+    }
+
+    return render(request, "launcher/elb.html", ctx)
+
+
+## EC2 FUNCTIONS    
 def ajax_getRegionsForProfile(request, profile_id):
     """Get all available regions for a given profile."""
     regions = get_object_or_404(Profile, pk=profile_id).region_set.all()
@@ -486,3 +499,95 @@ def f1(request):
     optionset = EC2LaunchOptionSet.objects.get(pk=100)
     instances = get_instances_for_ec2launchoptionset(ec2resource, optionset)
     return JSONResponse(instances)
+
+
+## ELB FUNCTIONS
+def update_elbs(request):
+    profile = get_object_or_404(Profile, pk=request.GET.get('profile_id'))
+    region = get_object_or_404(Region, pk=request.GET.get('region_id'))
+    session = boto3.Session(
+        profile_name=profile.name,
+        region_name=region.code
+    )
+    elbclient = session.client("elb")
+    try:
+        resp = elbclient.describe_load_balancers()
+        lbnames = list(map(
+            lambda x:x['LoadBalancerName'],
+            resp['LoadBalancerDescriptions']
+        ))
+    except Exception as ex:
+        print(ex.message)
+        return HttpResponse(ex.message)
+
+    for lbname in lbnames:
+        # check if already exists:
+        try:
+            elb = ELB.objects.get(profile=profile, region=region, name=lbname)
+        except ELB.DoesNotExist:
+            elb = ELB()
+            elb.name = lbname
+            elb.profile = profile
+            elb.region = region
+            elb.save()
+    return HttpResponse("OK")
+
+
+def ajax_getDistinctModuleNames(request):
+    profile = get_object_or_404(Profile, pk=request.GET.get('profile_id'))
+    region = get_object_or_404(Region, pk=request.GET.get('region_id'))
+    optionsets = EC2LaunchOptionSet.objects.filter(profile=profile, region=region)
+    d = {}
+    for optionset in optionsets:
+        d.update({optionset.module: optionset.id})
+    return JSONResponse(sorted(d.keys()))
+    #return JSONResponse(d)
+
+
+def ajax_getModuleVersions(request):
+    #optionset = get_object_or_404(EC2LaunchOptionSet, pk=request.POST.get('set_id'))
+    profile = get_object_or_404(Profile, pk=request.GET.get('profile_id'))
+    region = get_object_or_404(Region, pk=request.GET.get('region_id'))
+    module = request.GET.get('module')
+    optionsets = EC2LaunchOptionSet.objects.filter(
+        profile=profile,
+        region=region,
+        module=module
+    )
+    versions = list(map(
+        lambda x:x.version,
+        optionsets
+    ))
+    return JSONResponse(versions)
+
+
+def ajax_getELBInstances(request):
+    profile = get_object_or_404(Profile, pk=request.GET.get('profile_id'))
+    region = get_object_or_404(Region, pk=request.GET.get('region_id'))
+    elbname = request.GET.get('elb')
+    #elb = get_object_or_404(ELB, profile=profile, region=region, name=elbname)
+    session = boto3.Session(
+        profile_name=profile.name,
+        region_name=region.code
+    )
+    elbclient = session.client("elb")
+    ec2resource = session.resource("ec2")
+    
+    dict_state = {}
+    resp = elbclient.describe_instance_health(LoadBalancerName=elbname)
+    for state in resp['InstanceStates']:
+        dict_state.update({state['InstanceId']: state['State']})
+    instance_ids = dict_state.keys()
+
+    #dict_instances = {}
+    list_instances = []
+    instances = ec2resource.instances.filter(InstanceIds=instance_ids)
+    for instance in instances:
+        instance_name = find_name_tag(instance)
+        #dict_instances.update({instance_id: instance_name})
+        list_instances.append({
+            'id': instance.id,
+            'name': instance_name,
+            'state': dict_state.get(instance.id)
+        })
+    return JSONResponse(list_instances)
