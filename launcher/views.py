@@ -561,6 +561,18 @@ def ajax_getModuleVersions(request):
     return JSONResponse(versions)
 
 
+def ajax_getModuleInstances(request):
+    profile = get_object_or_404(Profile, pk=request.GET.get('profile_id'))
+    region = get_object_or_404(Region, pk=request.GET.get('region_id'))
+    elbname = request.GET.get('elb')
+    #elb = get_object_or_404(ELB, profile=profile, region=region, name=elbname)
+    session = boto3.Session(
+        profile_name=profile.name,
+        region_name=region.code
+    )
+    ec2resource = session.resource("ec2")
+
+
 def ajax_getELBInstances(request):
     profile = get_object_or_404(Profile, pk=request.GET.get('profile_id'))
     region = get_object_or_404(Region, pk=request.GET.get('region_id'))
@@ -591,3 +603,12 @@ def ajax_getELBInstances(request):
             'state': dict_state.get(instance.id)
         })
     return JSONResponse(list_instances)
+
+
+def ajax_initELBUpdate(request):
+    profile = get_object_or_404(Profile, pk=request.POST.get('profile_id'))
+    region = get_object_or_404(Region, pk=request.POST.get('region_id'))
+    elbname = request.POST.get('elb')
+    instances_reg = request.POST.getlist('instances_reg[]')
+    instances_dereg = request.POST.getlist('instances_dereg[]')
+    

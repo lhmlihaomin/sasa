@@ -164,3 +164,56 @@ class ELB(models.Model):
 
     def __unicode__(self):
         return unicode(self.__str__())
+
+
+TASK_CREATED = 0
+TASK_REGISTERED = 1
+TASK_INSERVICE = 2
+TASK_COMPLETED = 3
+
+
+class ELBGenericUpdateTask(models.Model):
+    elb_name = models.CharField(max_length=1000)
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE, default=None, null=True)
+    region = models.ForeignKey(Region, on_delete=models.CASCADE, default=None, null=True)
+    instances_reg = models.TextField()
+    instances_dereg = models.TextField()
+    finished = models.BooleanField(default=False)
+    confirmed = models.BooleanField(default=False)
+    stage = models.IntegerField(default=0)
+
+    def __str__(self):
+        return self.elb_name
+
+    def __unicode__(self):
+        return unicode(self.__str__())
+
+    def set_stage(self, stage):
+        """Set the current stage of this task."""
+        # Stages:
+        #   0: just created;
+        #   1: new instances registered;
+        #   2: every new instance "InService"
+        #   3: old instances deregistered, task is finished.
+        self.stage = stage
+
+    def instances_registered(self):
+        self.stage = TASK_REGISTERED
+
+    def instances_inservice(self):
+        self.stage = TASK_INSERVICE
+
+    def instances_deregistered(self):
+        self.stage = TASK_COMPLETED
+
+    @property
+    def status(self):
+        progress_txt = ["25%", "50%", "75%", "100%"]
+        status_txt = [
+            "Task queued.",
+            "Registered new instances. Checking health states ...",
+            "New instances InService. Deregistering old instances ...",
+            "Completed."
+        ]
+        return (progress_txt[self.stage], status_txt[self.stage])
+        
