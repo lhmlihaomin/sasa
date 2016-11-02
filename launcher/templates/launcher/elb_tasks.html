@@ -22,42 +22,7 @@
                 </div>
                 <div class="navbar-default sidebar" role="navigation">
                     <div class="sidebar-nav navbar-collapse">
-                        <ul class="nav" id="side-menu">
-                            <li class="sidebar-search">
-                                <div class="input-group">
-                                    <label>PROFILE</label>
-                                    <select id="selProfile" class="form-control" onchange="getRegionsForProfile()" autocomplete="off">
-                                        <option value="0" selected> --- </option>
-                                        {% for profile in profiles %}
-                                        <option value="{{profile.id}}">{{profile.name}}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                            </li>
-                            <li class="sidebar-search">
-                                <div class="input-group">
-                                    <label>REGION</label>
-                                    <select id="selRegions" class="form-control" onchange="selRegionsChanged()">
-                                        <option value="0"> --- </option>
-                                    </select>
-                                </div>
-                            </li>
-                            <li class="sidebar-search">
-                                <div class="input-group">
-                                    <label style="display:block;">LOAD BALANCERS</label>
-                                    <button class="btn btn-primary" type="button" onclick="updateELBs()">UPDATE</button>
-                                    <button class="btn btn-primary" type="button" onclick="">LIST</button>
-                                </div>
-                            </li>
-                            <li class="sidebar-search">
-                                <div class="input-group">
-                                    <label style="display:block;">EXPERIMENTAL</label>
-                                    <button class="btn btn-default" type="button" id="btnF1">F1</button>
-                                    <button class="btn btn-default" type="button" id="btnF2">F2</button>
-                                    <button class="btn btn-default" type="button" id="btnF3">F3</button>
-                                </div>
-                            </li>
-                        </ul>
+                        
                     </div>
                 </div>
             </nav>
@@ -67,6 +32,9 @@
                 <!-- PLACEHOLDER BEHIND FIXED NAVBAR -->
                 <div class="row" style="height: 50px;margin-bottom:10px;"></div>
                 <!-- /PLACEHOLDER -->
+                <div class="row">
+                    <h1>ELB UPDATE TASKS</h1>
+                </div>
                 <div class="row">
                     <div class="col-lg-12">
 
