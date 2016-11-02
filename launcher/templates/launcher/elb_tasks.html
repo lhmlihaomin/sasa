@@ -63,80 +63,36 @@
             </nav>
             <!-- /NAVIGATION -->
 
-            <div id="page-wrapper">
+             <div id="page-wrapper">
                 <!-- PLACEHOLDER BEHIND FIXED NAVBAR -->
                 <div class="row" style="height: 50px;margin-bottom:10px;"></div>
                 <!-- /PLACEHOLDER -->
                 <div class="row">
                     <div class="col-lg-12">
-                        <h1>ELB INSTANCES UPDATE</h1>
-                        <div>
-                        <span class="alert alert-info">Choose profile & region, choose instances, and then click
-                            <button class="btn btn-primary" onclick="startELBGenericUpdateTask()">START</button>
-                            , or 
-                            <a href="./elb_tasks/">view all tasks</a>. 
-                        </span>
-                        </div>
+
+                        <table class="table table-striped table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Profile</th>
+                                    <th>Region</th>
+                                    <th>ELB Name</th>
+                                    <th>Task Stage</th>
+                            </thead>
+                            <tbody>
+                                {% for task in tasks %}
+                                <tr>
+                                    <td>{{task.profile.name}}</td>
+                                    <td>{{task.region.code}}</td>
+                                    <td>{{task.elb_name}}</td>
+                                    <td>{{task.status.0}}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+
                     </div>
-                </div>
-
-                <div class="row" style="padding-top:20px;">
-
-                    <!-- COL0: MODULE INSTANCES -->
-                    <div class="col-lg-6" id="divModuleInstances">
-                        <div class="panel panel-green">
-                            <div class="panel-heading">ADD THESE INSTANCES:</div>
-                            <div class="panel-body">
-                                <div style="margin-bottom: 10px;">
-                                    <label for="selModules">MODULE:</label>
-                                    <select id="selModules" class="my_select" onchange="getModuleVersions()">
-                                        <option>---</option>
-                                    </select>
-                                    <label for="selVersions">VERSION:</label>
-                                    <select id="selVersions" class="my_select">
-                                        <option>---</option>
-                                    </select>
-                                    <button class="btn btn-primary" onclick="getModuleInstances()">LIST INSTANCES</button>
-                                </div>
-
-                                <table class="table table-striped table-bordered table-hover" id="tableAddInstances">
-                                    <thead>
-                                        <tr><th></th><th>ID</th><th>NAME</th><th>STATE</th></tr>
-                                    </thead>
-                                    <tbody id="tbodyAddInstances">
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- COL1: ELB INSTANCES -->
-                    <div class="col-lg-6" id="divELBInstances">
-                        <div class="panel panel-red">
-                            <div class="panel-heading">REMOVE THESE INSTANCES:</div>
-                            <div class="panel-body">
-                                <div style="margin-bottom: 10px;">
-                                    <label for="selELBs">ELBs:</label>
-                                    <select id="selELBs" class="my_select">
-                                        <option>---</option>
-                                    </select>
-                                    <button class="btn btn-primary" onclick="getELBInstances()">LIST INSTANCES</button>
-                                </div>
-
-                                <table class="table table-striped table-bordered table-hover" id="tableRemoveInstances">
-                                    <thead>
-                                        <tr><th></th><th>ID</th><th>NAME</th><th>STATE</th></tr>
-                                    </thead>
-                                    <tbody id="tbodyRemoveInstances">
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-
-        </div>
+                 </div>
+             </div>
 
         <script src="{% static 'launcher/js/jquery-1.12.4.min.js' %}"></script>
         <script src="{% static 'launcher/js/bootstrap.min.js' %}"></script>

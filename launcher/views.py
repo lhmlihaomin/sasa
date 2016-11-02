@@ -3,11 +3,13 @@ import json
 import logging
 
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.urls import reverse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 import boto3
 
-from .models import Profile, Region, AWSResource, EC2LaunchOptionSet, ELB
+from .models import Profile, Region, AWSResource, EC2LaunchOptionSet, ELB, \
+ELBGenericUpdateTask
 from .awsresource import AWSResourceHandler
 from .ec2 import run_instances, find_name_tag, add_instance_tags, \
 add_volume_tags, get_instances_for_ec2launchoptionset
@@ -503,8 +505,8 @@ def f1(request):
 
 ## ELB FUNCTIONS
 def update_elbs(request):
-    profile = get_object_or_404(Profile, pk=request.GET.get('profile_id'))
-    region = get_object_or_404(Region, pk=request.GET.get('region_id'))
+    profile = get_object_or_404(Profile, pk=request.POST.get('profile_id'))
+    region = get_object_or_404(Region, pk=request.POST.get('region_id'))
     session = boto3.Session(
         profile_name=profile.name,
         region_name=region.code
@@ -518,7 +520,7 @@ def update_elbs(request):
         ))
     except Exception as ex:
         print(ex.message)
-        return HttpResponse(ex.message)
+        return JSONResponse(ex.message)
 
     for lbname in lbnames:
         # check if already exists:
@@ -530,7 +532,45 @@ def update_elbs(request):
             elb.profile = profile
             elb.region = region
             elb.save()
-    return HttpResponse("OK")
+    return JSONResponse(True)
+
+
+def elb_tasks(request):
+    tasks = ELBGenericUpdateTask.objects.all()
+    return render(request, 'launcher/elb_tasks.html', {'tasks': tasks})
+
+
+def ajax_startELBGenericUpdateTask(request):
+    # check data and create new task
+    # return redirect
+    profile = get_object_or_404(Profile, pk=request.POST.get('profile_id'))
+    region = get_object_or_404(Region, pk=request.POST.get('region_id'))
+    elb_name = request.POST.get('elb_name')
+    instances_reg = request.POST.getlist('instances_reg[]')
+    instances_dereg = request.POST.getlist('instances_dereg[]')
+
+    if elb_name == "---":
+        return JSONResponse(False)
+    if len(instances_reg) + len(instances_dereg) == 0:
+        return JSONResponse(False)
+
+    try:
+        task = ELBGenericUpdateTask()
+        task.elb_name = elb_name
+        task.profile = profile
+        task.region = region
+        task.instances_reg = json.dumps(instances_reg)
+        task.instances_dereg = json.dumps(instances_dereg)
+        task.finished = False
+        task.confirmed = False
+        task.stage = 0
+        task.save()
+    except Exception as ex:
+        print(ex.message)
+        return JSONResponse(False)
+
+    #return HttpResponseRedirect(reverse('elb_tasks'))
+    return JSONResponse(True)
 
 
 def ajax_getDistinctModuleNames(request):
@@ -554,24 +594,36 @@ def ajax_getModuleVersions(request):
         region=region,
         module=module
     )
-    versions = list(map(
-        lambda x:x.version,
-        optionsets
-    ))
+    #versions = list(map(
+    #    lambda x:x.version,
+    #    optionsets
+    #))
+    versions = []
+    for optionset in optionsets:
+        versions.append([optionset.version, optionset.id])
     return JSONResponse(versions)
 
 
 def ajax_getModuleInstances(request):
     profile = get_object_or_404(Profile, pk=request.GET.get('profile_id'))
     region = get_object_or_404(Region, pk=request.GET.get('region_id'))
-    elbname = request.GET.get('elb')
-    #elb = get_object_or_404(ELB, profile=profile, region=region, name=elbname)
+    optionset = get_object_or_404(EC2LaunchOptionSet, pk=request.GET.get('set_id'))
+
     session = boto3.Session(
         profile_name=profile.name,
         region_name=region.code
     )
     ec2resource = session.resource("ec2")
+    instances = get_instances_for_ec2launchoptionset(ec2resource, optionset)
+    return JSONResponse(instances)
 
+
+def ajax_getELBs(request):
+    profile = get_object_or_404(Profile, pk=request.GET.get('profile_id'))
+    region = get_object_or_404(Region, pk=request.GET.get('region_id'))
+    elbs = ELB.objects.filter(profile=profile, region=region)
+    elb_names = [elb.name for elb in elbs]
+    return JSONResponse(elb_names)
 
 def ajax_getELBInstances(request):
     profile = get_object_or_404(Profile, pk=request.GET.get('profile_id'))
@@ -590,6 +642,8 @@ def ajax_getELBInstances(request):
     for state in resp['InstanceStates']:
         dict_state.update({state['InstanceId']: state['State']})
     instance_ids = dict_state.keys()
+    if len(instance_ids) == 0:
+        return JSONResponse([])
 
     #dict_instances = {}
     list_instances = []
@@ -604,11 +658,3 @@ def ajax_getELBInstances(request):
         })
     return JSONResponse(list_instances)
 
-
-def ajax_initELBUpdate(request):
-    profile = get_object_or_404(Profile, pk=request.POST.get('profile_id'))
-    region = get_object_or_404(Region, pk=request.POST.get('region_id'))
-    elbname = request.POST.get('elb')
-    instances_reg = request.POST.getlist('instances_reg[]')
-    instances_dereg = request.POST.getlist('instances_dereg[]')
-    

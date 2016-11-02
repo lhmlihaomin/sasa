@@ -45,6 +45,7 @@ function getRegionsForProfile() {
 function listRegions(regions) {
     var selRegions = $('#selRegions');
     selRegions.empty();
+    $('<option selected>---</option>').appendTo(selRegions);
     for (var i=0; i<regions.length; i++) {
         var option = $('<option></option>').html(regions[i].full_name)
                                            .prop("value", regions[i].id);
@@ -682,4 +683,257 @@ function togglePanelBody(a) {
 
 function toggleEC2launchOptionSetListPanelBodies() {
     $('#divEC2LaunchOptionSetList .panel-body').toggle();
+}
+
+/**
+ * ELB functions:
+ */
+function updateELBs() {
+    var profileId = $('#selProfile').val();
+    var regionId = $('#selRegions').val();
+    if (profileId == 0 || regionId == 0) {
+        showErrorMessage("You need to select a profile/region first.");
+        return false;
+    }
+
+    showStartMessage("Updating ELBs ...");
+    $.ajax({
+        type: "post",
+        url: "./update_elbs/",
+        data: {
+            profile_id: profileId,
+            region_id: regionId
+        },
+        dataType: "json",
+        success: function (response) {
+            if (response) {
+                showResultMessage("ELBs updated.");
+            }
+        }
+    });
+}
+
+
+function getDistinctModuleNames() {
+    function showDistinctModuleNames(data) {
+        var sel = $('#selModules');
+        sel.empty();
+        $('<option selected>---</option>').appendTo(sel);
+        for (var i=0; i<data.length; i++) {
+            $('<option></option>')
+                .prop("value", data[i])
+                .html(data[i])
+                .appendTo(sel)
+        }
+    }
+
+    var profileId = $('#selProfile').val();
+    var regionId = $('#selRegions').val();
+    if (profileId == 0 || regionId == 0) {
+        showErrorMessage("You need to select a profile/region first.");
+        return false;
+    }
+
+    $.ajax({
+        type: "get",
+        url: "./get_distinct_module_names/",
+        data: {
+            profile_id: profileId,
+            region_id: regionId
+        },
+        dataType: "json",
+        success: showDistinctModuleNames
+    });
+}
+
+
+function getModuleVersions() {
+    function showModuleVersions(data) {
+        var sel = $('#selVersions')
+        sel.empty();
+        $('<option selected>---</option>').appendTo(sel);
+        for (var i=0; i<data.length; i++) {
+            $('<option></option>')
+                .html(data[i][0])
+                .prop("value", data[i][1])
+                .appendTo(sel);
+        }
+    }
+
+    var profileId = $('#selProfile').val();
+    var regionId = $('#selRegions').val();
+    var moduleName = $('#selModules').val()
+    if (profileId == 0 || regionId == 0) {
+        showErrorMessage("You need to select a profile/region first.");
+        return false;
+    }
+
+    $.ajax({
+        type: "get",
+        url: "./get_module_versions/",
+        data: {
+            profile_id: profileId,
+            region_id: regionId,
+            module: moduleName
+        },
+        dataType: "json",
+        success: showModuleVersions
+    });
+}
+
+
+function getModuleInstances() {
+    function showModuleInstances(data) {
+        var tbody = $('#tbodyAddInstances');
+        tbody.empty();
+        for (var i=0; i<data.length; i++) {
+            var input = $('<input type="checkbox" name="instances_reg[]" />')
+                .prop('value', data[i].id)
+            $('<tr></tr>')
+                .append($('<td></td>').append(input))
+                .append('<td>'+data[i].id+'</td>')
+                .append('<td>'+data[i].name+'</td>')
+                .append('<td>'+data[i].state+'</td>')
+                .appendTo(tbody);
+        }
+    }
+    
+    var profileId = $('#selProfile').val();
+    var regionId = $('#selRegions').val();
+    var setId = $('#selVersions').val();
+    if (profileId == 0 || regionId == 0) {
+        showErrorMessage("You need to select a profile/region first.");
+        return false;
+    }
+
+    $.ajax({
+        type: "get",
+        url: "./get_module_instances/",
+        data: {
+            profile_id: profileId,
+            region_id: regionId,
+            set_id: setId
+        },
+        dataType: "json",
+        success: showModuleInstances
+    });
+}
+
+
+function getELBs() {
+    function showELBs(data) {
+        var sel = $('#selELBs');
+        sel.empty();
+        $('<option selected>---</option>').appendTo(sel);
+        for (var i=0; i<data.length; i++) {
+            $('<option></option>')
+                .html(data[i])
+                .appendTo(sel);
+        }
+    }
+
+    var profileId = $('#selProfile').val();
+    var regionId = $('#selRegions').val();
+    if (profileId == 0 || regionId == 0) {
+        showErrorMessage("You need to select a profile/region first.");
+        return false;
+    }
+
+    $.ajax({
+        type: "get",
+        url: "./get_elbs/",
+        data: {
+            profile_id: profileId,
+            region_id: regionId
+        },
+        dataType: "json",
+        success: showELBs
+    });
+}
+
+
+function getELBInstances() {
+    function showELBInstances(data) {
+        var tbody = $('#tbodyRemoveInstances');
+        tbody.empty();
+        for (var i=0; i<data.length; i++) {
+            var input = $('<input type="checkbox" name="instances_dereg[]" />')
+                .prop('value', data[i].id)
+            $('<tr></tr>')
+                .append($('<td></td>').append(input))
+                .append('<td>'+data[i].id+'</td>')
+                .append('<td>'+data[i].name+'</td>')
+                .append('<td>'+data[i].state+'</td>')
+                .appendTo(tbody);
+        }
+    }
+
+    var profileId = $('#selProfile').val();
+    var regionId = $('#selRegions').val();
+    var elbName = $('#selELBs').val();
+    if (profileId == 0 || regionId == 0) {
+        showErrorMessage("You need to select a profile/region first.");
+        return false;
+    }
+
+    $.ajax({
+        type: "get",
+        url: "./get_elb_instances/",
+        data: {
+            profile_id: profileId,
+            region_id: regionId,
+            elb: elbName
+        },
+        dataType: "json",
+        success: showELBInstances
+    });
+}
+
+
+function selRegionsChanged() {
+    getDistinctModuleNames();
+    getELBs();
+}
+
+
+function startELBGenericUpdateTask() {
+    var profileId = $('#selProfile').val();
+    var regionId = $('#selRegions').val();
+    var elbName = $('#selELBs').val();
+    if (profileId == 0 || regionId == 0) {
+        showErrorMessage("You need to select a profile/region first.");
+        return false;
+    }
+    var instancesReg = []
+    var inputs = $('input[name=instances_reg\\[\\]]')
+    for (var i=0; i<inputs.length; i++) {
+        if (inputs[i].checked) {
+            instancesReg.push($(inputs[i]).val());
+        }
+    }
+    var instancesDereg = []
+    var inputs = $('input[name=instances_dereg\\[\\]]')
+    for (var i=0; i<inputs.length; i++) {
+        if (inputs[i].checked) {
+            instancesDereg.push($(inputs[i]).val());
+        }
+    }
+    console.log(instancesReg);
+    console.log(instancesDereg);
+
+    $.ajax({
+        type: "post",
+        url: "./start_elb_generic_update_task/",
+        data: {
+            profile_id: profileId,
+            region_id: regionId,
+            elb_name: elbName,
+            instances_reg: instancesReg,
+            instances_dereg: instancesDereg
+        },
+        dataType: "json",
+        success: function (response) {
+            
+        }
+    });
 }
