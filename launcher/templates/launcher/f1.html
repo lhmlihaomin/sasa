@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+    <head>
+        <meta http-equiv="content-type" content="text/html; Charset=UTF-8" />
+        <title>EC2 LAUNCHER</title>
+        <link rel="stylesheet" type="text/css" href="{% static 'launcher/css/bootstrap.min.css' %}"/>
+        <link rel="stylesheet" type="text/css" href="{% static 'launcher/css/common.css' %}"/>
+        <link rel="stylesheet" type="text/css" href="{% static 'launcher/css/metisMenu.min.css' %}"/>
+        <link rel="stylesheet" type="text/css" href="{% static 'launcher/css/font-awesome.min.css' %}"/>
+        <link rel="stylesheet" type="text/css" href="{% static 'launcher/css/sb-admin-2.css' %}"/>
+        <link rel="stylesheet" type="text/css" href="{% static 'launcher/css/messenger.css' %}"/>
+        <link rel="stylesheet" type="text/css" href="{% static 'launcher/css/messenger-theme-flat.css' %}"/>
+    </head>
+    <body>
+        <div id="wrapper">
+            <ul>
+                <li><input type="checkbox" class="chk" id="chk_1"><label for="chk_1">CHK 1</label></li>
+                <li><input type="checkbox" class="chk" id="chk_2"><label for="chk_2">CHK 2</label></li>
+                <li><input type="checkbox" class="chk" id="chk_3"><label for="chk_3">CHK 3</label></li>
+                <li><input type="checkbox" class="chk" id="chk_4"><label for="chk_4">CHK 4</label></li>
+                <li><input type="checkbox" class="chk" id="chk_5"><label for="chk_5">CHK 5</label></li>
+                <li><input type="checkbox" class="chk" id="chk_6"><label for="chk_6">CHK 6</label></li>
+            </ul>
+        </div>
+
+        <script src="{% static 'launcher/js/jquery-1.12.4.min.js' %}"></script>
+        <script src="{% static 'launcher/js/bootstrap.min.js' %}"></script>
+        <script src="{% static 'launcher/js/metisMenu.min.js' %}"></script>
+        <script src="{% static 'launcher/js/sb-admin-2.js' %}"></script>
+        <script src="{% static 'launcher/js/messenger.min.js' %}"></script>
+        <script src="{% static 'launcher/js/messenger-theme-flat.js' %}"></script>
+        <script src="{% static 'launcher/js/ace.js' %}"></script>
+        <script src="{% static 'launcher/js/launcher.js' %}"></script>
+        <script>
+function handleAjaxError(xhr, status, error) {
+    alert("Ajax request failed: "+status+" \n "+error)
+}
+
+// using jQuery
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+function csrfSafeMethod(method) {
+    // these HTTP methods do not require CSRF protection
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+}
+
+var csrftoken = getCookie('csrftoken');
+$.ajaxSetup({
+    beforeSend: function(xhr, settings) {
+        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+        }
+    },
+    error: handleAjaxError
+});
+
+
+/* global variables */
+var msg = null;                     // the pop-up Messenger object;
+var resourceTypes = [               // list of AWS resource types;
+    "images",
+    "key_pairs",
+    "instance_profiles",
+    "vpcs",
+    "subnets",
+    "security_groups",
+    "server_certificates"
+];
+var updateResourceIndex = -1;       // index of which resource type is being updated;
+var editor;                         // JSON editor (ace) object;
+var editorNew;                      // JSON editor for creating new optionset;
+var EC2LaunchOptionSetId = 0;       // Id of the EC2LaunchOptionSet currently being edited/updated.
+var lastCheckbox = null;
+$(document).ready(function() {
+    Messenger.options = {
+        extraClasses: 'messenger-fixed messenger-on-top',
+        theme: 'flat'
+    };
+
+    $('.chk').click(function(event) {
+        var checkboxes = $('.chk');
+        if (event.shiftKey) {
+            if (!lastCheckbox) return true;
+            var m = checkboxes.index(lastCheckbox);
+            var n = checkboxes.index(this);
+            var selectedCheckboxes = checkboxes.slice(
+                Math.min(m, n),
+                Math.max(m, n)
+            );
+            console.log($(this).prop('checked'));
+            $(lastCheckbox).prop('checked', $(this).prop('checked'));
+            selectedCheckboxes.prop('checked', $(this).prop('checked'));
+        } else {
+            lastCheckbox = this;
+        }
+        console.log(lastCheckbox);
+    })
+
+})
+</script>
+    </body>
+</html>

@@ -523,16 +523,23 @@ function refreshOnlineInstances(setId) {
         tbody.empty();
         $('#spanOnlineInstances').html("ONLINE INSTANCES: "+data.length);
         for (var i=0; i<data.length; i++) {
+            var chk = $('<input type="checkbox" name="instance_id[]" value="'+data[i].id+'" class="instanceChk"/>')
             var btnStart = $('<button class="btn btn-primary" title="Start"><i class="fa fa-play"></i></button>')
                 .click(function(i) {return function() {startInstance(data[i].id);}}(i));
             var btnStop = $('<button class="btn btn-primary" title="Stop"><i class="fa fa-stop"></i></button>')
                 .click(function(i) {return function() {stopInstance(data[i].id);}}(i));
             var btnTerminate = $('<button class="btn btn-primary" title="Terminate"><i class="fa fa-trash-o"></i></button>')
                 .click(function(i) {return function() {terminateInstance(data[i].id);}}(i));
-            var tr = $('<tr><td>'
+            var tr = $('<tr></tr>');
+            var chkTd = $('<td></td>').append(chk)
+            tr.append(chkTd)
+              .append($('<td>'+data[i].id+'</td>'))
+              .append($('<td>'+data[i].name+'</td>'))
+              .append($('<td>'+data[i].state+'</td>'));
+            /*var tr = $('<tr><td>'
                 +data[i].id+'</td><td>'
                 +data[i].name+'</td><td>'
-                +data[i].state+'</td></tr>');
+                +data[i].state+'</td></tr>');*/
             var td = $('<td></td>')
                 .append(btnStart)
                 .append(btnStop)
@@ -540,6 +547,25 @@ function refreshOnlineInstances(setId) {
                 .appendTo(tr)
             tr.appendTo(tbody);
         }
+
+        $('.instanceChk').click(function(event) {
+        var checkboxes = $('.instanceChk');
+        if (event.shiftKey) {
+            if (!lastCheckbox) return true;
+            var m = checkboxes.index(lastCheckbox);
+            var n = checkboxes.index(this);
+            var selectedCheckboxes = checkboxes.slice(
+                Math.min(m, n),
+                Math.max(m, n)
+            );
+            console.log($(this).prop('checked'));
+            $(lastCheckbox).prop('checked', $(this).prop('checked'));
+            selectedCheckboxes.prop('checked', $(this).prop('checked'));
+        } else {
+            lastCheckbox = this;
+        }
+        console.log(lastCheckbox);
+    });
     }
 
     window.EC2LaunchOptionSetId = setId;
@@ -640,6 +666,80 @@ function terminateInstance(instanceId) {
             profile_id: profileId,
             region_id: regionId,
             instance_id: instanceId,
+        },
+        dataType: "json",
+        success: function(data){
+            alert(data);
+            refreshOnlineInstances(window.EC2LaunchOptionSetId);
+        }
+    })
+}
+
+
+function stopSelectedInstances() {
+    var profileId = $('#selProfile').val();
+    var regionId = $('#selRegions').val();
+    if (profileId == 0 || regionId == 0) {
+        showErrorMessage("You need to select a profile/region first.");
+        return false;
+    }
+    var instanceIds = [];
+    $('.instanceChk').each(function(index, e) {
+        if ($(e).prop('checked')) {
+            instanceIds.push($(e).prop('value'));
+        }
+    })
+    if (instanceIds.length <= 0) {
+        showErrorMessage("No instances selected.");
+        return false;
+    }
+    if (!confirm("Are you sure to [STOP] selected instances?")) {
+        return false;
+    }
+    $.ajax({
+        url: "./stop_instances/",
+        method: "post",
+        data: {
+            profile_id: profileId,
+            region_id: regionId,
+            instance_ids: instanceIds
+        },
+        dataType: "json",
+        success: function(data){
+            alert(data);
+            refreshOnlineInstances(window.EC2LaunchOptionSetId);
+        }
+    })
+}
+
+
+function terminateSelectedInstances() {
+    var profileId = $('#selProfile').val();
+    var regionId = $('#selRegions').val();
+    if (profileId == 0 || regionId == 0) {
+        showErrorMessage("You need to select a profile/region first.");
+        return false;
+    }
+    var instanceIds = [];
+    $('.instanceChk').each(function(index, e) {
+        if ($(e).prop('checked')) {
+            instanceIds.push($(e).prop('value'));
+        }
+    })
+    if (instanceIds.length <= 0) {
+        showErrorMessage("No instances selected.");
+        return false;
+    }
+    if (!confirm("Are you sure to [TERMINATE] selected instances?")) {
+        return false;
+    }
+    $.ajax({
+        url: "./terminate_instances/",
+        method: "post",
+        data: {
+            profile_id: profileId,
+            region_id: regionId,
+            instance_ids: instanceIds
         },
         dataType: "json",
         success: function(data){
@@ -936,4 +1036,13 @@ function startELBGenericUpdateTask() {
             
         }
     });
+}
+
+function toggleInstanceCheckboxes() {
+    var chk = $('#iToggleInstancesCheck');
+    if (chk.prop('checked')) {
+        $('.instanceChk').prop('checked', true);
+    } else {
+        $('.instanceChk').prop('checked', false);
+    }
 }

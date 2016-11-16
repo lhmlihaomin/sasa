@@ -433,6 +433,64 @@ def ajax_terminateInstance(request):
     return JSONResponse(msg)
 
 
+def ajax_stopInstances(request):
+    profile = get_object_or_404(Profile, pk=request.POST.get('profile_id'))
+    region = get_object_or_404(Region, pk=request.POST.get('region_id'))
+    session = boto3.Session(
+        profile_name=profile.name,
+        region_name=region.code
+    )
+    instance_ids = request.POST.getlist("instance_ids[]")
+    ec2resource = session.resource("ec2")
+
+    logger.info("stopInstances: %s"%(instance_ids))
+
+    try:
+        ec2client = session.client("ec2")
+        resp = ec2client.stop_instances(InstanceIds=instance_ids)
+    except Exception as ex:
+        logger.error("stopInstances: %s"%(ex.message))
+        return JSONResponse(ex.message)
+
+    msg = "Instance states: \n "
+    for stopping_instance in resp['StoppingInstances']:
+        msg += "%s: %s -> %s \n "%(stopping_instance['InstanceId'],
+                                   stopping_instance['PreviousState']['Name'],
+                                   stopping_instance['CurrentState']['Name'])
+
+    logger.info("stopInstances: DONE.")
+    return JSONResponse(msg)
+
+
+def ajax_terminateInstances(request):
+    profile = get_object_or_404(Profile, pk=request.POST.get('profile_id'))
+    region = get_object_or_404(Region, pk=request.POST.get('region_id'))
+    session = boto3.Session(
+        profile_name=profile.name,
+        region_name=region.code
+    )
+    instance_ids = request.POST.getlist("instance_ids[]")
+    ec2resource = session.resource("ec2")
+
+    logger.info("terminateInstances: %s"%(instance_ids))
+
+    try:
+        ec2client = session.client("ec2")
+        resp = ec2client.terminate_instances(InstanceIds=instance_ids)
+    except Exception as ex:
+        logger.error("terminateInstances: %s"%(ex.message))
+        return JSONResponse(ex.message)
+
+    msg = "Instance states: \n "
+    for terminating_instance in resp['TerminatingInstances']:
+        msg += "%s: %s -> %s \n "%(terminating_instance['InstanceId'],
+                                   terminating_instance['PreviousState']['Name'],
+                                   terminating_instance['CurrentState']['Name'])
+
+    logger.info("terminateInstances: DONE.")
+    return JSONResponse(msg)
+
+
 def ajax_stopAllInstances(request):
     optionset = get_object_or_404(EC2LaunchOptionSet, pk=request.POST.get('set_id'))
     session = boto3.Session(
@@ -488,19 +546,7 @@ def remove_names(request):
 
 
 def f1(request):
-    def get_list_of(attr, seq):
-        return list(map(lambda x:x[attr], seq))
-
-    PROFILE_NAME = "cn-prd"
-    REGION_NAME = "cn-north-1"
-
-    session = boto3.Session(profile_name=PROFILE_NAME, region_name=REGION_NAME)
-    client = session.client("elb")
-    ec2resource = session.resource("ec2")
-
-    optionset = EC2LaunchOptionSet.objects.get(pk=100)
-    instances = get_instances_for_ec2launchoptionset(ec2resource, optionset)
-    return JSONResponse(instances)
+    return render(request, "launcher/f1.html", {})
 
 
 ## ELB FUNCTIONS
