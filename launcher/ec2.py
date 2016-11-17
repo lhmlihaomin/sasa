@@ -8,8 +8,8 @@ def run_instances(ec2res, optionset, count):
     """Run 'count' number of instances use settings defined in 'optionset'.
     Returns a list of instance ids on success.
     """
-    # check disk settings:
     opset = json.loads(optionset.content)
+    # check disk settings:
     block_device_mappings = []
     if not opset['use_default_ebs_settings'] and opset['volume_type'] == 'io1':
         bdm = {
@@ -26,6 +26,11 @@ def run_instances(ec2res, optionset, count):
             #'NoDevice': ''
         }
         block_device_mappings = [bdm]
+    # check security group settings:
+    if opset.has_key('security_groups'):
+        security_group_ids = [x[1] for x in opset['security_groups']]
+    else:
+        security_group_ids = [opset['security_group'][1]]
     # try to run instances:
     try:
         instances = ec2res.create_instances(
@@ -38,7 +43,7 @@ def run_instances(ec2res, optionset, count):
             KeyName=opset['keypair'][1],
             MinCount=count,
             MaxCount=count,
-            SecurityGroupIds=[opset['security_group'][1]],
+            SecurityGroupIds=security_group_ids,
             SubnetId=opset['subnets'][0][1],
         )
         instance_ids = [x.id for x in instances]
