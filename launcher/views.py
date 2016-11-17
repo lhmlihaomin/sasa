@@ -121,9 +121,15 @@ def ajax_listEC2LaunchOptionSets(request):
     """Get all EC2LaunchOptionSet objects for a given profile & region."""
     profile = get_object_or_404(Profile, pk=request.GET.get('profile_id'))
     region = get_object_or_404(Region, pk=request.GET.get('region_id'))
-    optionsets = EC2LaunchOptionSet.objects\
-        .filter(profile=profile, region=region, enabled=True)\
-        .order_by('module', 'version')
+    module_name = request.GET.get('module_name')
+    if module_name:
+        optionsets = EC2LaunchOptionSet.objects\
+            .filter(profile=profile, region=region, module=module_name, enabled=True)\
+            .order_by('module', 'version')
+    else:
+        optionsets = EC2LaunchOptionSet.objects\
+            .filter(profile=profile, region=region, enabled=True)\
+            .order_by('module', 'version')
     seq = list(map(EC2LaunchOptionSet.to_dict, optionsets))
     return JSONResponse(seq)
 
@@ -246,10 +252,10 @@ def ajax_updateEC2LaunchOptionSet(request):
         optionset.pk = None
         optionset.save()
         logger.info("updateEC2LaunchOptionSet: DONE.")
-        return JSONResponse(True)
+        return JSONResponse([True, optionset.module])
     except Exception as ex:
         logger.error("updateEC2LaunchOptionSet: %s"%(ex.message,))
-        return JSONResponse(ex.message)
+        return JSONResponse([False, ex.message])
 
 
 def ajax_deleteEC2LaunchOptionSet(request):

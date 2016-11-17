@@ -139,7 +139,7 @@ function listResources() {
 }
 
 
-function listEC2LaunchOptionSets() {
+function listEC2LaunchOptionSets(moduleName) {
     function makeModulePanel(module) {
         if ($('#panelBody_'+module).length) {
             return $('#panelBody_'+module);
@@ -160,6 +160,7 @@ function listEC2LaunchOptionSets() {
                 .append(panelHeading)
                 .append(panelBody)
                 .appendTo($('#divEC2LaunchOptionSetList'));
+            return panelBody;
         }
     }
     function showListEC2LaunchOptionSets(data) {
@@ -167,30 +168,6 @@ function listEC2LaunchOptionSets() {
             var module = data[i].module;
             var panelBody = makeModulePanel(module);
             var tbody = $('#tbody_'+module);
-            /*var tdActions = $('<td></td>')
-                .append(
-                    $('<button></button>')
-                        .addClass('btn btn-primary')
-                        .css("margin-right", "2px")
-                        .append($('<i></i>').addClass('fa fa-list'))
-                        .prop("title", "Detail")
-                        .attr("onclick", "viewEC2LaunchOptionSet("+data[i].id+")")
-                )
-                .append(
-                    $('<button></button>')
-                        .addClass('btn btn-primary')
-                        .css("margin-right", "2px")
-                        .append($('<i></i>').addClass('fa fa-arrow-up'))
-                        .prop("title", "Update to new version")
-                        .attr("onclick", "listImagesForModule("+data[i].id+")")
-                )
-                .append(
-                    $('<button></button>')
-                        .addClass('btn btn-success')
-                        .append($('<i></i>').addClass('fa fa-play'))
-                        .prop("title", "Run")
-                        .attr("onclick", "runInstances("+data[i].id+")")
-                )*/
 
             var tdActions = $(
 '<td><div class="btn-group">\
@@ -216,19 +193,28 @@ Action <span class="caret"></span>\
         }
     }
 
+    if (typeof moduleName == "undefined") {
+        moduleName = "";
+    }
     var profileId = $('#selProfile').val();
     var regionId = $('#selRegions').val();
     if (profileId == 0 || regionId == 0) {
         showErrorMessage("You need to select a profile/region first.");
         return false;
     }
-    $('#divEC2LaunchOptionSetList').empty();
+    if (moduleName == "") {
+        $('#divEC2LaunchOptionSetList').empty();
+    } else {
+        $('#tbody_'+moduleName).empty()
+    }
+    console.log("HAHAHA "+moduleName);
     $.ajax({
         url: "./list_ec2launchoptionsets/",
         method: "get",
         data: {
             profile_id: profileId,
-            region_id: regionId
+            region_id: regionId,
+            module_name: moduleName
         },
         dataType: "json",
         success: showListEC2LaunchOptionSets
@@ -404,8 +390,10 @@ function listImagesForModule(setId) {
 
 function updateEC2LaunchOptionSet() {
     function onUpdateSuccess(data) {
-        if (data) {
-            listEC2LaunchOptionSets();
+        if (data[0]) {
+            listEC2LaunchOptionSets(data[1]);
+        } else {
+            showErrorMessage(data[1]);
         }
     }
 
