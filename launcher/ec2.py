@@ -27,7 +27,13 @@ def run_instances(ec2res, optionset, count):
         }
         block_device_mappings = [bdm]
     # check security group settings:
-    if opset.has_key('security_groups'):
+    if opset.has_key('security_group_names'):
+        security_group_ids = get_security_group_ids_by_name(
+            ec2res, 
+            opset['vpc'][1],
+            opset['security_group_names']
+        )
+    elif opset.has_key('security_groups'):
         security_group_ids = [x[1] for x in opset['security_groups']]
     else:
         security_group_ids = [opset['security_group'][1]]
@@ -182,3 +188,26 @@ def get_instances_for_ec2launchoptionset(ec2res, optionset):
             #ret.append(instance)
         ret.sort(cmp=name_cmp, key=lambda l:l['name'])
     return ret
+
+
+def get_security_group_ids_by_name(ec2res, vpc_id, names):
+    """Find security groups with the given names and return their ids.
+    
+    AWS does not allow the use of security group names outside the default VPC
+    when launching EC2 instances. So group names must be converted to ids 
+    before calling run_instances."""
+    filter_vpc = {
+        'Name': 'vpc-id',
+        'Values': [vpc_id]
+    }
+    filter_group_name = {
+        'Name': 'group-name',
+        'Values': names
+    }
+    group_ids = []
+    for sg in ec2res.security_groups.filter(Filters=[
+        filter_vpc,
+        filter_group_name
+    ]):
+        group_ids.append(sg.id)
+    return group_ids
