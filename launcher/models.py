@@ -53,7 +53,7 @@ class AWSResource(models.Model):
 
     @staticmethod
     def get_image_version(image_name):
-        pattern = "([adeprtuv]+)-ami-([a-zA-Z_]+)-([\d\._]+)-([a-zA-Z\d]+)-(\d{8})"
+        pattern = "([adeprtuv]+)-ami-([a-zA-Z_]+)-([\d\._a-zA-Z]+)-([a-zA-Z\d]+)-(\d{8})"
         m = re.match(pattern, image_name)
         if m is not None:
             return m.groups()[2]
@@ -61,7 +61,7 @@ class AWSResource(models.Model):
 
     @staticmethod
     def filter_image_by_module(profile, region, module_name):
-        pattern = "([adeprtuv]+)-ami-%s-([\d\._]+)-([a-zA-Z\d]+)-(\d{8})"%(module_name,)
+        pattern = "([adeprtuv]+)-ami-%s-([\d\._a-zA-Z]+)-([a-zA-Z\d]+)-(\d{8})"%(module_name,)
         ret = []
         resources = AWSResource.objects.filter(
             profile=profile,
@@ -120,7 +120,7 @@ class EC2LaunchOptionSet(models.Model):
                                  self.az)
 
     def ami_version_match(self):
-        pattern = "([adeprtuv]+)-ami-([a-zA-Z_]+)-([\d\._]+)-([a-zA-Z\d]+)-(\d{8})"
+        pattern = "([adeprtuv]+)-ami-([a-zA-Z_]+)-([\d\._a-zA-Z]+)-([a-zA-Z\d]+)-(\d{8})"
         try:
             content_dict = json.loads(self.content)
             m = re.match(pattern, content_dict['image'][0])
