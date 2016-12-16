@@ -23,7 +23,7 @@
                         <table class="table table-striped table-bordered table-hover">
                             <thead>
                                 <tr>
-                                    <th colspan="6">
+                                    <th colspan="7">
                                         <label>区域：</label>
                                         <select>
                                             <option>Singapore</option>
@@ -35,6 +35,7 @@
                                     <th><button>+批次</button></th>
                                 </tr>
                                 <tr>
+                                    <td>类型</td>
                                     <th>时间</th>
                                     <th>模块</th>
                                     <th>版本</th>
@@ -44,8 +45,9 @@
                                     <th>添加</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="TheTbody">
                                 <tr>
+                                    <td>AT</td>
                                     <td><input class="form-control" /></td>
                                     <td><input class="form-control" /></td>
                                     <td><input class="form-control" /></td>
@@ -53,19 +55,19 @@
                                     <td><input class="form-control" /></td>
                                     <td><input class="form-control" /></td>
                                     <td>
-                                        <button>+自动步骤</button>
-                                        <button>+手动操作</button>
+                                        <button>+AT</button>
+                                        <button>+MT</button>
                                     </td>
                                 </tr>
 
                                 <tr>
-                                    <th>描述：</th>
-                                    <td colspan="5">
-                                        <textarea></textarea>
+                                    <td>MT</td>
+                                    <td colspan="6">
+                                        <textarea class="form-control"></textarea>
                                     </td>
                                     <td>
-                                        <button>+自动步骤</button>
-                                        <button>+手动操作</button>
+                                        <button>+AT</button>
+                                        <button>+MT</button>
                                     </td>
                                 </tr>
                             </tbody>
@@ -78,6 +80,23 @@
             <div class="col-lg-1"></div>
         </div>
 
+        <div style="display:none">
+            <table>
+                <tbody>
+                    <tr id="row1">
+                        <td onclick="alert('my');">a</td>
+                        <td>b</td>
+                        <td>c</td>
+                    </tr>
+                    <tr id="row2">
+                        <td>1</td>
+                        <td>2</td>
+                        <td>3</td>
+                    </tr>
+                </tbody>
+            </table>n 
+        </div>
+
         <script src="{% static 'launcher/js/jquery-1.12.4.min.js' %}"></script>
         <script src="{% static 'launcher/js/bootstrap.min.js' %}"></script>
         <script src="{% static 'launcher/js/metisMenu.min.js' %}"></script>
@@ -86,5 +105,19 @@
         <script src="{% static 'launcher/js/messenger-theme-flat.js' %}"></script>
         <script src="{% static 'launcher/js/ace.js' %}"></script>
         <script src="{% static 'launcher/js/launcher.js' %}"></script>
+
+        <script>
+var pici = 1;
+var bu = 1;
+function f1() {
+    var r = $('#row1').clone();
+    r.prop(
+        'id',
+        "row_"+pici.toString()+"_"+bu.toString()
+    );
+    bu += 1;
+    r.appendTo('#TheTbody');
+}
+        </script>
     </body>
 </html>

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+    <head>
+        <meta http-equiv="content-type" content="text/html; Charset=UTF-8" />
+        <title>PRD UPDATE</title>
+        <link rel="stylesheet" type="text/css" href="{% static 'launcher/css/bootstrap.min.css' %}"/>
+        <link rel="stylesheet" type="text/css" href="{% static 'launcher/css/common.css' %}"/>
+        <link rel="stylesheet" type="text/css" href="{% static 'launcher/css/metisMenu.min.css' %}"/>
+        <link rel="stylesheet" type="text/css" href="{% static 'launcher/css/font-awesome.min.css' %}"/>
+        <link rel="stylesheet" type="text/css" href="{% static 'launcher/css/sb-admin-2.css' %}"/>
+        <link rel="stylesheet" type="text/css" href="{% static 'launcher/css/messenger.css' %}"/>
+        <link rel="stylesheet" type="text/css" href="{% static 'launcher/css/messenger-theme-flat.css' %}"/>
+        <style>
+.divStep{
+    float:left;
+    margin:0px;
+    padding:0px;
+}
+#prevStep{
+    width:20%;
+}
+#prevStepHeading{
+    background-color:#d9534f;
+    color:white;
+    border-top-left-radius: 5px;
+    margin:0px;
+    padding:10px;
+}
+#prevStepBody{
+    border-bottom-left-radius: 5px;
+    margin:0px;
+    padding:10px;
+}
+#currentStep{
+    width:60%;
+}
+#currentStepHeading{
+    background-color:#337ab7;
+    color:white;
+    margin:0px;
+    padding:10px;
+}
+#currentStepBody{
+    margin:0px;
+    padding:10px;
+}
+#nextStep{
+    width:20%;
+}
+#nextStepHeading{
+    background-color:#5cb85c;
+    margin:0px;
+    padding:10px;
+    border-top-right-radius: 5px;
+    color:white;
+}
+#nextStepBody{
+    border-bottom-right-radius: 5px;
+}
+
+        </style>
+    </head>
+    <body>
+
+        <div id="wrapper">
+
+            <!-- NAVIGATION -->
+            <nav class="navbar navbar-default navbar-fixed-top" role="navigation" style="margin-bottom: 0px;">
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="{% url 'launcher:index' %}">EC2 LAUNCHER</a>
+                </div>
+                <div class="navbar-default sidebar" role="navigation">
+                    <div class="sidebar-nav navbar-collapse">
+                        <ul class="nav" id="side-menu">
+                            <li class="sidebar-search">
+                                <div class="input-group">
+                                    <label>PROFILE</label>
+                                    <select id="selProfile" class="form-control" onchange="getRegionsForProfile()" autocomplete="off">
+                                        <option value="0" selected> --- </option>
+                                        {% for profile in profiles %}
+                                        <option value="{{profile.id}}">{{profile.name}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </li>
+                            <li class="sidebar-search">
+                                <div class="input-group">
+                                    <label>REGION</label>
+                                    <select id="selRegions" class="form-control">
+                                        <option value="0"> --- </option>
+                                    </select>
+                                </div>
+                            </li>
+                            <li class="sidebar-search">
+                                <div class="input-group">
+                                    <label style="display:block;">EC2 LAUNCH OPTION SETS</label>
+                                    <button class="btn btn-primary" type="button" onclick="showDialogEC2LaunchOptionSet()">NEW</button>
+                                    <button class="btn btn-primary" type="button" onclick="listEC2LaunchOptionSets()">LOAD</button>
+                                </div>
+                            </li>
+                            <li class="sidebar-search">
+                                <div class="input-group">
+                                    <label style="display:block;">AWS RESOURCES</label>
+                                    <button class="btn btn-primary" type="button" onclick="listResources()">DISPLAY</button>
+                                    <button class="btn btn-primary" type="button" onclick="beginUpdateResources()">UPDATE</button>
+                                </div>
+                            </li>
+                            <li class="sidebar-search">
+                                <div class="input-group">
+                                    <label style="display:block;">EXPERIMENTAL</label>
+                                    <button class="btn btn-default" type="button" id="btnF1">F1</button>
+                                    <button class="btn btn-default" type="button" id="btnF2">F2</button>
+                                    <button class="btn btn-default" type="button" id="btnF3">F3</button>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+            <!-- /NAVIGATION -->
+
+            <div id="page-wrapper">
+                <div style="height:50px;"></div>
+                <!-- ROW 1 -->
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h1>MODULE UPDATE</h1>
+                    </div>
+                </div>
+                <!-- /ROW 1 -->
+                <!-- ROW 2 -->
+                <div class="row">
+                    <div class="col-lg-3">
+                        <div class="panel panel-red">
+                            <div class="panel-heading">&lt; PREV STEP</div>
+                            <div class="panel-body">
+                                <table class="table">
+                                    <tr><th>Name</th><td>appserver</td></tr>
+                                    <tr><th>Version</th><td>2.1.3</td></tr>
+                                    <tr><th>EC2</th><td>4 x m3.medium</td></tr>
+                                </table>
+                            </div>
+                            <div class="panel-footer">
+                                <button class="btn btn-default">VIEW</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="panel panel-primary">
+                            <div class="panel-heading">CURRENT STEP</div>
+                            <div class="panel-body">
+                                <table class="table">
+                                    <tr><th>Name</th><td>storage</td></tr>
+                                    <tr><th>Version</th><td>1.0.9</td></tr>
+                                    <tr><th>EC2</th><td>2 x t2.small</td></tr>
+                                </table>
+                            </div>
+                            <div class="panel-footer">
+                                <button class="btn btn-primary">START</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="panel panel-green">
+                            <div class="panel-heading">NEXT STEP &gt;</div>
+                            <div class="panel-body">
+                                <table class="table">
+                                    <tr><th>Name</th><td>vaservice</td></tr>
+                                    <tr><th>Version</th><td>2.1.1</td></tr>
+                                    <tr><th>EC2</th><td>2 x t2.small</td></tr>
+                                </table>
+                            </div>
+                            <div class="panel-footer">
+                                <button class="btn btn-default">GO</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /ROW 2 -->
+
+                <!-- ROW 3 -->
+                <div class="row">
+                    <h1>SERVICE CHECK</h1>
+                </div>
+                <!-- /ROW 3 -->
+
+                <!-- ROW 4 -->
+                <div class="row">
+                    <div style="padding:10px;">
+                        <div style="clear:both"></div>
+                        <div class="divStep" id="prevStep">
+                            <div id="prevStepHeading">&lt; Previous Step</div>
+                            <div id="prevStepBody"></div>
+                        </div>
+                        <div class="divStep" id="currentStep">
+                            <div id="currentStepHeading">Current Step</div>
+                            <div id="currentStepBody"></div>
+                        </div>
+                        <div class="divStep" id="nextStep">
+                            <div id="nextStepHeading">Next Step &gt;</div>
+                            <div id="nextStepBody"></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /ROW 4 -->
+
+                <!-- ROW 5 -->
+                <div class="row">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">appserver 2.1.1 --> 2.1.3</div>
+                        <div class="panel-body">
+                            <div class="row" data-title="row-instances">
+                                <div class="col-sm-2">Instances</div>
+                                <div class="col-sm-2">0/3 Ready</div>
+                                <div class="col-sm-2">未启动</div>
+                                <div class="col-sm-6">
+                                    <button class="btn btn-primary">启动新版</button>
+                                    <button class="btn btn-danger">停止旧版</button>
+                                    <button class="btn btn-info">详细信息</button>
+                                </div>
+                            </div>
+                            <div class="row" data-title="row-elb">
+                                <div class="col-sm-2">ELB</div>
+                                <div class="col-sm-2">0/3 InService</div>
+                                <div class="col-sm-2">未添加</div>
+                                <div class="col-sm-6">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /ROW 5 -->  
+            </div>
+        </div>
+        
+        <script src="{% static 'launcher/js/jquery-1.12.4.min.js' %}"></script>
+        <script src="{% static 'launcher/js/bootstrap.min.js' %}"></script>
+        <script src="{% static 'launcher/js/metisMenu.min.js' %}"></script>
+        <script src="{% static 'launcher/js/sb-admin-2.js' %}"></script>
+        <script src="{% static 'launcher/js/messenger.min.js' %}"></script>
+        <script src="{% static 'launcher/js/messenger-theme-flat.js' %}"></script>
+        <script src="{% static 'launcher/js/ace.js' %}"></script>
+        <script src="{% static 'launcher/js/launcher.js' %}"></script>
+    </body>
+</html>

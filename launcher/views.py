@@ -710,3 +710,5 @@ def ajax_getELBInstances(request):
         })
     return JSONResponse(list_instances)
 
+def prdupdate(request):
+    return render(request, "launcher/prdupdate1.html", {})

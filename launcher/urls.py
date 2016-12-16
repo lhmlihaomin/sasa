@@ -38,5 +38,6 @@ urlpatterns = [
     url("^elb/get_elbs/$", views.ajax_getELBs, name="get_elbs"),
     url("^elb/get_elb_instances/$", views.ajax_getELBInstances, name="get_elb_instances"),
     url("^elb/start_elb_generic_update_task/$", views.ajax_startELBGenericUpdateTask, name="start_elb_generic_update_task"),
-    
+
+    url("^prdupdate/", views.prdupdate, name="prdupdate"),
 ]
