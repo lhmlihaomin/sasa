@@ -146,7 +146,8 @@ function listEC2LaunchOptionSets(moduleName) {
         } else {
             //var panelHeading = $('<div></div>').addClass("panel-heading").html(module);
             var panelTitle = $('<a class="panelToggle" href="#" >'+module+'</a>')
-                .click(function(){
+                .click(function(e){
+                    e.preventDefault();
                     togglePanelBody(this)})
             var panelHeading = $('<div></div>').addClass("panel-heading").append(panelTitle);
             var panelBody = $('<div></div>').addClass("panel-body").prop("id", "panelBody_"+module);
