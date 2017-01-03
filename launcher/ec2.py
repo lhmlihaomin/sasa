@@ -11,7 +11,8 @@ def run_instances(ec2res, optionset, count):
     opset = json.loads(optionset.content)
     # check disk settings:
     block_device_mappings = []
-    if not opset['use_default_ebs_settings'] and opset['volume_type'] == 'io1':
+    #if not opset['use_default_ebs_settings'] and opset['volume_type'] == 'io1':
+    if not opset['use_default_ebs_settings']:
         bdm = {
             #'VirtualName': '',
             'DeviceName': '/dev/sda1',
@@ -25,6 +26,9 @@ def run_instances(ec2res, optionset, count):
             },
             #'NoDevice': ''
         }
+        # boto3 can't just fucking ignore Iops if volume_type is not io1:
+        if opset['volume_type'] != 'io1':
+            del bdm['Ebs']['Iops']
         block_device_mappings = [bdm]
     # check security group settings:
     if opset.has_key('security_group_names'):

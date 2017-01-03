@@ -120,10 +120,12 @@ class EC2LaunchOptionSet(models.Model):
                                  self.az)
 
     def ami_version_match(self):
-        pattern = "([adeprtuv]+)-ami-([a-zA-Z_]+)-([\d\._a-zA-Z]+)-([a-zA-Z\d]+)-(\d{8})"
+        pattern = "([adeprtuv]+)-ami-([a-zA-Z0-9_]+)-([\d\._a-zA-Z]+)-([a-zA-Z\d]+)-(\d{8})"
+        print(pattern)
         try:
             content_dict = json.loads(self.content)
             m = re.match(pattern, content_dict['image'][0])
+            print(m.groups())
             if m is not None:
                 version = m.groups()[2]
                 if version == self.version:

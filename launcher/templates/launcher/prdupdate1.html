@@ -58,7 +58,19 @@
 #nextStepBody{
     border-bottom-right-radius: 5px;
 }
-
+.oldver{
+    background-color:#d9534f;
+    color:white;
+    padding:5px;
+}
+.newver{
+    background-color:#5cb85c;
+    color: white;
+    padding:5px;
+}
+.current-module{
+    box-shadow: 3px 3px 3px 3px gray;
+}
         </style>
     </head>
     <body>
@@ -121,15 +133,15 @@
             <!-- /NAVIGATION -->
 
             <div id="page-wrapper">
-                <div style="height:50px;"></div>
-                <!-- ROW 1 -->
+                <div style="height:80px;"></div>
+                <!-- ROW 1 --><!--
                 <div class="row">
                     <div class="col-lg-12">
                         <h1>MODULE UPDATE</h1>
                     </div>
                 </div>
-                <!-- /ROW 1 -->
-                <!-- ROW 2 -->
+                --><!-- /ROW 1 -->
+                <!-- ROW 2 --><!--
                 <div class="row">
                     <div class="col-lg-3">
                         <div class="panel panel-red">
@@ -177,15 +189,15 @@
                         </div>
                     </div>
                 </div>
-                <!-- /ROW 2 -->
+                --><!-- /ROW 2 -->
 
-                <!-- ROW 3 -->
+                <!-- ROW 3 --><!--
                 <div class="row">
                     <h1>SERVICE CHECK</h1>
                 </div>
-                <!-- /ROW 3 -->
+                --><!-- /ROW 3 -->
 
-                <!-- ROW 4 -->
+                <!-- ROW 4 --><!--
                 <div class="row">
                     <div style="padding:10px;">
                         <div style="clear:both"></div>
@@ -203,12 +215,12 @@
                         </div>
                     </div>
                 </div>
-                <!-- /ROW 4 -->
+                --><!-- /ROW 4 -->
 
-                <!-- ROW 5 -->
+                <!-- ROW 5 --><!--
                 <div class="row">
                     <div class="panel panel-default">
-                        <div class="panel-heading">appserver 2.1.1 --> 2.1.3</div>
+                        <div class="panel-heading">appserver 2.1.1 --&gt; 2.1.3</div>
                         <div class="panel-body">
                             <div class="row" data-title="row-instances">
                                 <div class="col-sm-2">Instances</div>
@@ -230,7 +242,111 @@
                         </div>
                     </div>
                 </div>
-                <!-- /ROW 5 -->  
+                --><!-- /ROW 5 -->
+
+                <!-- ROW 6 -->
+                <div class="row">
+                    <div class="panel panel-primary current-module">
+                        <div class="panel-heading">
+                            <div class="row">
+                                <div class="col-lg-2">dal</div>
+                                <div class="col-lg-5 ">1.1.11_forXmas</div>
+                                <div class="col-lg-5 ">1.2.1</div>
+                            </div>
+                        </div>
+                        <div class="panel-body">
+                            <table class="table table-striped">
+                                <tbody>
+                                    <tr>
+                                        <th style="width:16.7%">
+                                            <label style="margin-right:5px;">EC2</label>
+                                            <button class="btn btn-default">刷新</button>
+                                        </th>
+                                        <td style="width:41.6%"><a href="#">在线 2 - 服务关闭 0 - 异常 0</a></td>
+                                        <td style="width:41.6%"><a href="#">在线 0 - 服务关闭 0 - 异常 0</a></td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+                                            <label style="margin-right:5px;">ELB</label>
+                                            <button class="btn btn-default">刷新</button>
+                                        </th>
+                                        <td>N/A</td>
+                                        <td>N/A</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="panel-footer">
+                            <div class="row">
+                                <div class="col-lg-2">
+                                    <button class="btn btn-success">标记完成</button>
+                                </div>
+                                <div class="col-lg-5 ">
+                                    <button class="btn btn-warning">停止服务 旧版</button>
+                                    <button class="btn btn-danger">关闭主机 旧版</button>
+                                    <button class="btn btn-danger">ELB移除 旧版</button>
+                                </div>
+                                <div class="col-lg-5 ">
+                                    <button class="btn btn-info">启动主机 新版</button>
+                                    <button class="btn btn-primary">ELB添加 新版</button>
+                                </div>
+                            </div>    
+                        </div>
+                    </div>
+                </div>
+                <!-- /ROW6 -->
+
+                <!-- ROW 7 -->
+                <div class="row">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">
+                            <div class="row">
+                                <div class="col-lg-2">appserver</div>
+                                <div class="col-lg-5 ">2.1.3</div>
+                                <div class="col-lg-5 ">2.2.1</div>
+                            </div>
+                        </div>
+                        <div class="panel-body">
+                            <table class="table table-striped">
+                                <tbody>
+                                    <tr>
+                                        <th style="width:16.7%">
+                                            <label style="margin-right:5px;">EC2</label>
+                                            <button class="btn btn-default">刷新</button>
+                                        </th>
+                                        <td style="width:41.6%"><a href="#">在线 2 - 服务关闭 0 - 异常 0</a></td>
+                                        <td style="width:41.6%"><a href="#">在线 0 - 服务关闭 0 - 异常 0</a></td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+                                            <label style="margin-right:5px;">ELB</label>
+                                            <button class="btn btn-default">刷新</button>
+                                        </th>
+                                        <td><a href="#">2/2 InService</a></td>
+                                        <td><a href="#">0/2 InService</a></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="panel-footer">
+                            <div class="row">
+                                <div class="col-lg-2">
+                                    <button class="btn btn-success">开始更新</button>
+                                </div>
+                                <div class="col-lg-5 ">
+                                    <button class="btn btn-warning disabled">停止服务 旧版</button>
+                                    <button class="btn btn-danger disabled">关闭主机 旧版</button>
+                                    <button class="btn btn-danger disabled">ELB移除 旧版</button>
+                                </div>
+                                <div class="col-lg-5 ">
+                                    <button class="btn btn-info disabled">启动主机 新版</button>
+                                    <button class="btn btn-primary disabled">ELB添加 新版</button>
+                                </div>
+                            </div>    
+                        </div>
+                    </div>
+                </div>
+                <!-- /ROW7 -->
             </div>
         </div>
         
