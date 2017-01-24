@@ -53,11 +53,12 @@ class AWSResource(models.Model):
 
     @staticmethod
     def get_image_version(image_name):
-        pattern = "([adeprtuv]+)-ami-([a-zA-Z_]+)-([\d\._a-zA-Z]+)-([a-zA-Z\d]+)-(\d{8})"
+        pattern = "([adeprtuv]+)-ami-([a-zA-Z0-9_]+)-([\d\._a-zA-Z]+)-([a-zA-Z\d]+)-(\d{8})"
         m = re.match(pattern, image_name)
         if m is not None:
             return m.groups()[2]
-        return ""
+        else:
+            raise Exception("Cannot find version in '%s'"%(image_name,))
 
     @staticmethod
     def filter_image_by_module(profile, region, module_name):
