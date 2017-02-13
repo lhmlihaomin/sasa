@@ -100,7 +100,9 @@ def add_instance_tags(ec2res, optionset, instance_ids):
     tags = json.loads(optionset.content)['tags']
     num = max + 1
     for instance_id in instance_ids:
-        tags.update({'Name': prefix+"-"+str(num)})
+        #tags.update({'Name': prefix+"-"+str(num)})
+        instance_name = "%s-%03d"%(prefix, num)
+        tags.update({'Name': instance_name})
         boto3tags = []
         for key in tags.keys():
             boto3tags.append({
